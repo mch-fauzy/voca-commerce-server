@@ -23,11 +23,11 @@ checkDbConnection()
             logger.info(`Server is running on port ${PORT}`);
         });
 
-        server.on('error', (err: ServerError) => {
-            if (err.code === 'EADDRINUSE') {
+        server.on('error', (error: ServerError) => {
+            if (error.code === 'EADDRINUSE') {
                 logger.error(`[server] Port ${PORT} is already in use. Please choose a different port.`);
             } else {
-                logger.error(`[server] An error occurred while starting the server: ${err.message}`);
+                logger.error(`[server] An error occurred while starting the server: ${error.message}`);
             }
             process.exit(1);
         });
