@@ -1,0 +1,31 @@
+{
+    "name": "voca-commerce-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "dist/server.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc",
+        "dev": "dotenv -e .env.development node dist/server.js",
+        "postinstall": "prisma generate",
+        "prismamigrate:dev": "dotenv -e .env.development prisma migrate dev",
+        "prismamigrate:prod": "dotenv -e .env.production prisma migrate deploy",
+        "prismagenerate": "prisma generate"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.7.4",
+        "prisma": "^5.20.0",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.20.0",
+        "dotenv-cli": "^7.4.2",
+        "express": "^4.21.0",
+        "winston": "^3.15.0"
+    }
+}

@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model voca_user {
+  id        String          @id @default(uuid())
+  email     String          @unique
+  password  String
+  role      voca_role       @default(USER)
+  createdAt DateTime        @default(now())
+  createdBy String
+  updatedAt DateTime        @updatedAt
+  updatedBy String
+  deletedAt DateTime?
+  deletedBy String?
+
+  wallet    voca_wallet?    // One relation (nullable)
+}
+
+model voca_product {
+  id            Int                         @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Float
+  available     Boolean                     @default(true)
+  createdAt     DateTime                    @default(now())
+  createdBy     String
+  updatedAt     DateTime                    @updatedAt
+  updatedBy     String
+  deletedAt     DateTime?
+  deletedBy     String?
+  transactions  voca_transaction_product[]  // Many relation
+}
+
+model voca_wallet {
+  id            Int                 @id @default(autoincrement())
+  userId        String              @unique
+  balance       Float               @default(0.0)
+  createdAt     DateTime            @default(now())
+  createdBy     String
+  updatedAt     DateTime            @updatedAt
+  updatedBy     String
+  deletedAt     DateTime?
+  deletedBy     String?
+  user          voca_user           @relation(fields: [userId], references: [id]) // One relation (not null)
+  transactions  voca_transaction[]
+}
+
+model voca_transaction {
+  id        Int                         @id @default(autoincrement())
+  walletId  Int
+  type      voca_transaction_type
+  amount    Float
+  status    voca_transaction_status     @default(PENDING)
+  createdAt DateTime                    @default(now())
+  createdBy String
+  updatedAt DateTime                    @updatedAt
+  updatedBy String
+  deletedAt DateTime?
+  deletedBy String?
+
+  wallet    voca_wallet                 @relation(fields: [walletId], references: [id])
+  products  voca_transaction_product[]
+}
+
+model voca_transaction_product {
+  id            Int                 @id @default(autoincrement())
+  transactionId Int
+  productId     Int
+  quantity      Int                 @default(1)
+
+  transaction   voca_transaction    @relation(fields: [transactionId], references: [id])
+  product       voca_product        @relation(fields: [productId], references: [id])
+}
+
+enum voca_role {
+  ADMIN
+  USER
+}
+
+enum voca_transaction_type {
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE
+}
+
+enum voca_transaction_status {
+  PENDING
+  COMPLETED
+  FAILED
+}
