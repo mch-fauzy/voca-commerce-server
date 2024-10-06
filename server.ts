@@ -4,15 +4,14 @@ import { checkDbConnection } from './utils/connection-check';
 import { logger } from './configs/winston';
 import http from 'http';
 
-const app = express();
-app.use(express.json());
-
-const PORT = CONFIG.SERVER.PORT;
-
 // Define a custom error type to include the 'code' property
 interface ServerError extends Error {
     code?: string;
 }
+
+const PORT = CONFIG.SERVER.PORT;
+const app = express();
+app.use(express.json());
 
 checkDbConnection()
     .then(() => {
