@@ -23,6 +23,7 @@ checkDbConnection()
             logger.info(`Server is running on port ${PORT}`);
         });
 
+        // Handle startup errors
         server.on('error', (error: ServerError) => {
             if (error.code === 'EADDRINUSE') {
                 logger.error(`[server] Port ${PORT} is already in use. Please choose a different port.`);
