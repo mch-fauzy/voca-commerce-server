@@ -17,17 +17,24 @@
     "author": "",
     "license": "ISC",
     "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
         "@types/express": "^5.0.0",
+        "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^22.7.4",
+        "@types/uuid": "^10.0.0",
         "prisma": "^5.20.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.6.2"
     },
     "dependencies": {
         "@prisma/client": "^5.20.0",
+        "bcryptjs": "^2.4.3",
         "dotenv-cli": "^7.4.2",
         "express": "^4.21.0",
+        "http-status-codes": "^2.3.0",
         "ioredis": "^5.4.1",
+        "joi": "^17.13.3",
+        "jsonwebtoken": "^9.0.2",
         "winston": "^3.15.0"
     }
 }
