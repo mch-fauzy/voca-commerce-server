@@ -8,7 +8,7 @@ const checkDbConnection = async () => {
         await prisma.$queryRaw`SELECT 1`;
         logger.info('Connected to database');
     } catch (error) {
-        logger.error('[checkDbConnection] Failed connecting to the database:', error);
+        logger.error(`[checkDbConnection] Error connecting to the database: ${error}`);
         process.exit(1); // Exit the application if the database connection fails
     }
 };
@@ -19,7 +19,7 @@ const checkRedisConnection = async () => {
         await redis.ping()
         logger.info('Connected to Redis');
     } catch (error) {
-        logger.error('[checkRedisConnection] Failed connecting to Redis:', error);
+        logger.error(`[checkRedisConnection] Error connecting to Redis: ${error}`);
         process.exit(1);
     }
 };
