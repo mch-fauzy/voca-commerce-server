@@ -21,7 +21,7 @@ Promise.all([checkDbConnection(), checkRedisConnection()])
 
         // Handle startup errors
         server.on('error', (error) => {
-            logger.error(`[server] An error occurred while starting the server: ${error.message}`);
+            logger.error(`[server] An error occurred while starting the server: ${error}`);
             process.exit(1);
         });
     });
