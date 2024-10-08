@@ -11,14 +11,7 @@ interface CreateUser {
 
 interface UserData {
     id: string;
-    email: string;
     role: Role;
-    createdAt: Date;
-    createdBy: string;
-    updatedAt: Date;
-    updatedBy: string;
-    deletedAt: Date;
-    deletedBy: string;
 }
 
 export { CreateUser, UserData, Role };
