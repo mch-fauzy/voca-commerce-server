@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { CONFIG } from './configs/config';
 import { checkDbConnection, checkRedisConnection } from './utils/connection-check';
 import { logger } from './configs/winston';
-import { errorHandler } from './middlewares/error-handler';
+import { errorHandler } from './middlewares/error-handler-middleware';
 import { router } from './routes';
 
 const PORT = CONFIG.SERVER.PORT;
