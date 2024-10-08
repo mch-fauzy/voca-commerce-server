@@ -5,7 +5,8 @@ const CONSTANTS = {
         CACHE_EXPIRY: 60 * 60, // In seconds
     },
     MESSAGE: {
-        SUCCESS: 'Success'
+        SUCCESS: 'Success',
+        UNEXPECTED_ERROR: 'Internal Server Error'
     },
     ROLE: {
         ADMIN: Role.ADMIN,

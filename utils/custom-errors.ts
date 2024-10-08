@@ -3,12 +3,11 @@ import { StatusCodes } from 'http-status-codes';
 class CustomError extends Error {
     // Custom properties
     code: number;
-    customError: boolean;
 
     constructor(message: string, code: number) {
         super(message); // Call the constructor of its parent class to access the parent's properties and methods
         this.code = code;
-        this.customError = true;
+        this.name = 'CustomError';
 
         // Showing only the relevant function calls leading to the error
         if (Error.captureStackTrace) {
