@@ -4,7 +4,7 @@ import { TokenPayload } from "../models/dto/auth-dto";
 import { CONFIG } from "../configs/config";
 import { CONSTANTS } from "./constants";
 
-const generateToken = (payload: TokenPayload) => {
+const generateToken = (payload: Pick<TokenPayload, 'email' | 'role'>) => {
     const token = sign(
         {
             email: payload.email,

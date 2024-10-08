@@ -1,4 +1,6 @@
 import Joi from "joi";
+import { Request } from 'express';
+import { JwtPayload } from "jsonwebtoken";
 
 import { Role } from "../user-model";
 
@@ -23,4 +25,14 @@ const loginValidate = Joi.object({
     password: Joi.string().required()
 });
 
-export { RegisterRequest, registerValidate, LoginRequest, loginValidate };
+interface TokenPayload extends JwtPayload {
+    email: string;
+    role: Role;
+    id: number;
+}
+
+interface SessionRequest extends Request {
+    session?: TokenPayload
+}
+
+export { RegisterRequest, registerValidate, LoginRequest, loginValidate, TokenPayload, SessionRequest };

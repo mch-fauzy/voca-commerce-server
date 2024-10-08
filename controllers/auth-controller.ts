@@ -4,7 +4,6 @@ import { StatusCodes } from 'http-status-codes';
 import { AuthService } from '../services/auth-service';
 import { LoginRequest, loginValidate, RegisterRequest, registerValidate } from '../models/dto/auth-dto';
 import { CONSTANTS } from '../utils/constants';
-import { nextTick } from 'process';
 
 class AuthController {
     static async registerUser(req: Request, res: Response, next: NextFunction) {

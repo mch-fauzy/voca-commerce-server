@@ -9,9 +9,4 @@ interface CreateUser {
     updatedBy: string;
 }
 
-interface UserData {
-    id: string;
-    role: Role;
-}
-
-export { CreateUser, UserData, Role };
+export { CreateUser, Role };

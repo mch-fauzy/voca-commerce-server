@@ -6,7 +6,10 @@ const CONSTANTS = {
     },
     MESSAGE: {
         SUCCESS: 'Success',
-        UNEXPECTED_ERROR: 'Internal Server Error'
+        UNEXPECTED_ERROR: 'Internal server error',
+        MISSING_TOKEN: 'Missing token',
+        INVALID_TOKEN: 'Invalid token',
+        ADMIN_ONLY: 'Admin access only'
     },
     ROLE: {
         ADMIN: Role.ADMIN,
