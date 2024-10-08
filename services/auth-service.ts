@@ -33,8 +33,8 @@ class AuthService {
         if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
 
         const token = generateToken({
-            id: user.id,
-            role: user.role
+            email: user.email,
+            role: user.role,
         });
 
         return { token: token };

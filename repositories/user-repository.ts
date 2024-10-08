@@ -21,7 +21,7 @@ class UserRepository {
             const result = await prisma.voca_user.findUnique({
                 where: { email: email },
                 select: {
-                    id: true,
+                    email: true,
                     password: true,
                     role: true
                 }

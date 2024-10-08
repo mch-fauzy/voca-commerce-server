@@ -1,12 +1,15 @@
 import { sign } from "jsonwebtoken";
 
-import { UserData } from "../models/user-model";
+import { TokenPayload } from "../models/dto/auth-dto";
 import { CONFIG } from "../configs/config";
 import { CONSTANTS } from "./constants";
 
-const generateToken = (data: Pick<UserData, 'id' | 'role'>) => {
+const generateToken = (payload: TokenPayload) => {
     const token = sign(
-        { id: data.id, role: data.role },
+        {
+            email: payload.email,
+            role: payload.role
+        },
         String(CONFIG.APP.JWT_ACCESS_KEY),
         { expiresIn: CONSTANTS.JWT.EXPIRY });
 
