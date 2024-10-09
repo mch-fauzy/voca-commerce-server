@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { authRouterV1 } from './v1/auth-route';
 import swaggerDocument from '../swagger.json'
 import { CONFIG } from '../configs/config';
+import { productRouterV1 } from './v1/product-route';
 
 const router = Router();
 const SWAGGER_CSS_URL =
@@ -13,6 +14,10 @@ const routes = [
     {
         path: '/v1',
         route: authRouterV1,
+    },
+    {
+        path: '/v1',
+        route: productRouterV1,
     },
 ];
 
