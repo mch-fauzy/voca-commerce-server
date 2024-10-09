@@ -5,7 +5,6 @@ import { RegisterRequest, LoginRequest } from '../models/dto/auth-dto';
 import { comparePassword, hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
 import { CustomError } from '../utils/custom-errors';
-import { CONSTANTS } from '../utils/constants';
 
 class AuthService {
     static async register(req: RegisterRequest) {
@@ -22,7 +21,7 @@ class AuthService {
             updatedBy: req.email
         });
 
-        return { message: CONSTANTS.MESSAGE.SUCCESS };
+        return { message: 'Success' };
     }
 
     static async login(req: LoginRequest) {
@@ -37,7 +36,7 @@ class AuthService {
             role: user.role,
         });
 
-        return { token: token };
+        return { data: token };
     }
 };
 
