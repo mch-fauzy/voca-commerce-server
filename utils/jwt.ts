@@ -1,8 +1,8 @@
-import { sign } from "jsonwebtoken";
+import { sign } from 'jsonwebtoken';
 
-import { TokenPayload } from "../models/dto/auth-dto";
-import { CONFIG } from "../configs/config";
-import { CONSTANTS } from "./constants";
+import { TokenPayload } from '../models/dto/auth-dto';
+import { CONFIG } from '../configs/config';
+import { CONSTANTS } from './constants';
 
 const generateToken = (payload: Pick<TokenPayload, 'email' | 'role'>) => {
     const token = sign(

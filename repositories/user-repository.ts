@@ -1,7 +1,7 @@
-import { prisma } from "../configs/prisma-client";
-import { logger } from "../configs/winston";
-import { CreateUser } from "../models/user-model";
-import { CustomError } from "../utils/custom-errors";
+import { prisma } from '../configs/prisma-client';
+import { logger } from '../configs/winston';
+import { CreateUser } from '../models/user-model';
+import { CustomError } from '../utils/custom-error';
 
 class UserRepository {
     static async createUser(userData: CreateUser) {
@@ -47,7 +47,7 @@ class UserRepository {
             return result ? true : false;
         } catch (error) {
             logger.error(`[isUserExistsByEmail] Error checking user by email: ${error}`)
-            throw CustomError.internalServer('Failed to check user existence');
+            throw CustomError.internalServer('Failed to check user by email');
         }
     }
 

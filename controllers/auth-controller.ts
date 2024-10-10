@@ -6,12 +6,12 @@ import { LoginRequest, loginValidate, RegisterRequest, registerValidate } from '
 import { CONSTANTS } from '../utils/constants';
 
 class AuthController {
-    static async registerUser(req: Request, res: Response, next: NextFunction) {
+    static registerUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body: RegisterRequest = await registerValidate.validateAsync(req.body);
             const result = await AuthService.register({
                 ...body,
-                role: CONSTANTS.ROLE.USER,
+                role: CONSTANTS.ROLES.USER,
             });
 
             res.status(StatusCodes.CREATED).json(result);
@@ -21,12 +21,12 @@ class AuthController {
         }
     };
 
-    static async registerAdmin(req: Request, res: Response, next: NextFunction) {
+    static registerAdmin = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body: RegisterRequest = await registerValidate.validateAsync(req.body);
             const result = await AuthService.register({
                 ...body,
-                role: CONSTANTS.ROLE.ADMIN,
+                role: CONSTANTS.ROLES.ADMIN,
             });
 
             res.status(StatusCodes.CREATED).json(result);
@@ -35,7 +35,7 @@ class AuthController {
         }
     };
 
-    static async login(req: Request, res: Response, next: NextFunction) {
+    static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body: LoginRequest = await loginValidate.validateAsync(req.body);
             const result = await AuthService.login(body);

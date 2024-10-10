@@ -12,7 +12,7 @@ const errorHandler = (error: CustomError | Error, req: Request, res: Response, n
         return;
     }
 
-    // Handle validation errors
+    // Handle validation errors for Joi validator
     if (error instanceof Error && error.name === 'ValidationError') {
         responseWithMessage(res, StatusCodes.BAD_REQUEST, error.message);
         return;

@@ -1,4 +1,4 @@
-import { Role } from "../models/user-model";
+import { Role } from '../models/user-model';
 
 const CONSTANTS = {
     REDIS: {

@@ -4,7 +4,7 @@ import { UserRepository } from '../repositories/user-repository';
 import { RegisterRequest, LoginRequest } from '../models/dto/auth-dto';
 import { comparePassword, hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { CustomError } from '../utils/custom-errors';
+import { CustomError } from '../utils/custom-error';
 
 class AuthService {
     static async register(req: RegisterRequest) {
