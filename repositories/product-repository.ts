@@ -1,7 +1,7 @@
 import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
 import { Filter } from '../models/filter';
-import { CreateProduct, UpdateProductAsDeleted, UpdateProduct } from '../models/product-model';
+import { CreateProduct, MarkProductAsDeleted, UpdateProduct } from '../models/product-model';
 import { CustomError } from '../utils/custom-error';
 
 class ProductRepository {
@@ -89,7 +89,7 @@ class ProductRepository {
         }
     }
 
-    static updateProductById = async (id: number, data: UpdateProduct | UpdateProductAsDeleted) => {
+    static updateProductById = async (id: number, data: UpdateProduct | MarkProductAsDeleted) => {
         try {
             const result = await prisma.voca_product.update({
                 where: { id: id },

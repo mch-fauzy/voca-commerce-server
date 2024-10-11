@@ -29,9 +29,9 @@ interface UpdateProduct {
     updatedBy: string;
 }
 
-interface UpdateProductAsDeleted {
+interface MarkProductAsDeleted {
     deletedAt: Date | null;
     deletedBy: string | null;
 }
 
-export { PRODUCT_DB_FIELD, CreateProduct, UpdateProduct, UpdateProductAsDeleted };
+export { PRODUCT_DB_FIELD, CreateProduct, UpdateProduct, MarkProductAsDeleted };
