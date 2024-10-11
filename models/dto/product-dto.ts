@@ -20,9 +20,12 @@ interface DeleteProductRequest {
     id: number;
 }
 
-interface MarkProductAsDeletedRequest {
-    id: number;
+interface MarkProductAsDeletedRequest extends DeleteProductRequest {
     email: string;
+}
+
+interface GetProductByIdRequest {
+    id: number;
 }
 
 class ProductValidator {
@@ -51,4 +54,4 @@ class ProductValidator {
     }
 }
 
-export { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, ProductValidator };
+export { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest, ProductValidator };

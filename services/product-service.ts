@@ -1,7 +1,8 @@
 import { ProductRepository } from '../repositories/product-repository';
-import { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest } from '../models/dto/product-dto';
+import { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest } from '../models/dto/product-dto';
 import { CustomError } from '../utils/custom-error';
-import { PRODUCT_DB_FIELD } from '../models/product-model';
+import { CONSTANTS } from '../utils/constants';
+import { redis } from '../configs/redis';
 // import { CreateProduct } from '../models/product-model';
 
 class ProductService {
@@ -45,6 +46,10 @@ class ProductService {
             updatedBy: req.email
         });
 
+        // Invalidate the cache
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
+        await redis.del(productKey);
+
         return 'Success';
     }
 
@@ -53,6 +58,9 @@ class ProductService {
         if (!isExist) throw CustomError.notFound('Product not found');
 
         await ProductRepository.deleteProductById(req.id);
+
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
+        await redis.del(productKey);
 
         return 'Success';
     }
@@ -66,27 +74,31 @@ class ProductService {
             deletedBy: req.email
         })
 
-        // await ProductRepository.getFilteredProducts({
-        //     filterFields: [
-        //         {
-        //             field: PRODUCT_DB_FIELD.deletedAt,
-        //             operator: 'equals',
-        //             value: null
-        //         }
-        //     ],
-        //     pagination: {
-        //         page: 1,
-        //         pageSize: 10
-        //     },
-        //     sorts: [
-        //         {
-        //             field: PRODUCT_DB_FIELD.id,
-        //             order: 'asc'
-        //         }
-        //     ]
-        // })
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
+        await redis.del(productKey);
 
         return 'Success';
+    }
+
+    static getProductById = async (req: GetProductByIdRequest) => {
+        // Get cache
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`; // Get unique key based on id
+        const cacheData = await redis.get(productKey);
+        if (cacheData) {
+            return JSON.parse(cacheData); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+        }
+
+        const data = await ProductRepository.getProductById(req.id);
+        if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound('Product not found');
+
+        // Set cache
+        await redis.setex(
+            productKey,
+            CONSTANTS.REDIS.CACHE_EXPIRY,
+            JSON.stringify(data)
+        ) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
+
+        return data;
     }
 }
 

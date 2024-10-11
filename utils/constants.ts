@@ -3,6 +3,7 @@ import { Role } from '../models/user-model';
 const CONSTANTS = {
     REDIS: {
         CACHE_EXPIRY: 60 * 60, // In seconds
+        PRODUCT_KEY: 'redisProduct'
     },
     ROLES: {
         ADMIN: Role.ADMIN,
