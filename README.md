@@ -32,7 +32,9 @@ To run this project in local, follow the steps below:
    ```
 
 4. Edit the database and Redis configuration in `.env.development` with your credentials:
+    
     __Note: Please create new database or schema__
+    
     ```
     DATABASE_URL='postgresql://johndoe:mypassword@localhost:5432/mydb?schema=public'
     REDIS_URL='redis://:@localhost:6379'
