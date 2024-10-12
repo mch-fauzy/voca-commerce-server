@@ -1,16 +1,19 @@
 # Voca Commerce Server
 
-## Stack
-- NodeJS with Typescript
-- Express
-- Postgresql
-- Prisma ORM
-- Redis
-- Vercel
+## Table of Contents
+* [Technologies Used](#technologies-used)
+* [Features](#features)
+* [Setup](#setup)
 
-## Getting Started
+## Technologies Used
+- NodeJS - version 18.17.0
+- Redis - version 7.2.4
+- Postgresql - version 14.13.0
 
-To get started with the API, follow the steps below:
+## Features
+
+## Setup
+To run this project in local, follow the steps below:
 
 1. Clone this repository:
 
@@ -28,7 +31,12 @@ To get started with the API, follow the steps below:
    npm install
    ```
 
-4. Edit the database configuration in `.env.development` with your PostgreSQL credentials `(please create new database)`
+4. Edit the database and Redis configuration in `.env.development` with your credentials:
+    __Note: Please create new database or schema__
+    ```
+    DATABASE_URL='postgresql://johndoe:mypassword@localhost:5432/mydb?schema=public'
+    REDIS_URL='redis://:@localhost:6379'
+    ```
 
 5. Migrate the database:
    ```
@@ -49,3 +57,8 @@ To get started with the API, follow the steps below:
    ```
    npm run dev
    ```
+
+9. By default, the server will run in:
+    ```
+    http://localhost:3000
+    ```
