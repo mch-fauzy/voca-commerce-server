@@ -28,6 +28,14 @@ interface GetProductByIdRequest {
     id: number;
 }
 
+interface GetProductsByFilterRequest {
+    name: string;
+    sort: string;
+    order: string;
+    page: number;
+    pageSize: number;
+}
+
 class ProductValidator {
     // Create product section
     private static createProductBodyValidate = Joi.object({
@@ -52,6 +60,18 @@ class ProductValidator {
     static validateUpdateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
         return await this.updateProductBodyValidate.validateAsync(body);
     }
+
+    private static getProductsByFilterQueryValidate = Joi.object({
+        name: Joi.string().optional(),
+        sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
+        order: Joi.string().optional().valid('asc', 'desc'),
+        page: Joi.number().min(1).optional(),
+        pageSize: Joi.number().min(1).optional(),
+    })
+
+    static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
+        return await this.getProductsByFilterQueryValidate.validateAsync(query);
+    }
 }
 
-export { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest, ProductValidator };
+export { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest, GetProductsByFilterRequest, ProductValidator };

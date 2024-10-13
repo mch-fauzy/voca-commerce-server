@@ -9,6 +9,7 @@ import { router } from './routes';
 
 const PORT = CONFIG.SERVER.PORT;
 const app = express();
+
 app.use(json());
 app.use('/', router);
 // Register the error handling middleware

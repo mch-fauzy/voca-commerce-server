@@ -1,21 +1,28 @@
 import { ProductRepository } from '../repositories/product-repository';
-import { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest } from '../models/dto/product-dto';
+import { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, GetProductByIdRequest, GetProductsByFilterRequest } from '../models/dto/product-dto';
 import { CustomError } from '../utils/custom-error';
 import { CONSTANTS } from '../utils/constants';
-import { redis } from '../configs/redis';
+import { PRODUCT_DB_FIELD } from '../models/product-model';
+import { RedisUtils } from '../utils/redis-cache';
 // import { CreateProduct } from '../models/product-model';
 
 class ProductService {
     static createProduct = async (req: CreateProductRequest) => {
         // Assign object explicitly to enforce strict type (Excess Property Checks)
-        await ProductRepository.createProduct({
-            name: req.name,
-            description: req.description,
-            price: req.price,
-            available: req.available,
-            createdBy: req.email,
-            updatedBy: req.email
-        });
+        await ProductRepository.createProduct(
+            {
+                name: req.name,
+                description: req.description,
+                price: req.price,
+                available: req.available,
+                createdBy: req.email,
+                updatedBy: req.email
+            }
+        );
+
+        /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
+        // Delete all cache related to set if new data created
+        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY);
 
         return 'Success';
     }
@@ -38,17 +45,20 @@ class ProductService {
         await ProductRepository.updateProductById(req.id, request);
         */
 
-        await ProductRepository.updateProductById(req.id, {
-            name: req.name,
-            description: req.description,
-            price: req.price,
-            available: req.available,
-            updatedBy: req.email
-        });
+        await ProductRepository.updateProductById(req.id,
+            {
+                name: req.name,
+                description: req.description,
+                price: req.price,
+                available: req.available,
+                updatedBy: req.email
+            }
+        );
 
-        // Invalidate the cache
-        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
-        await redis.del(productKey);
+        // delete the cache
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
+        await RedisUtils.deleteCache(productKey);
+        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
 
         return 'Success';
     }
@@ -59,8 +69,9 @@ class ProductService {
 
         await ProductRepository.deleteProductById(req.id);
 
-        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
-        await redis.del(productKey);
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
+        await RedisUtils.deleteCache(productKey);
+        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
 
         return 'Success';
     }
@@ -69,36 +80,104 @@ class ProductService {
         const data = await ProductRepository.getProductById(req.id);
         if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound('Product not found');
 
-        await ProductRepository.updateProductById(req.id, {
-            deletedAt: new Date(),
-            deletedBy: req.email
-        })
+        await ProductRepository.updateProductById(req.id,
+            {
+                deletedAt: new Date(),
+                deletedBy: req.email
+            }
+        );
 
-        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`;
-        await redis.del(productKey);
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
+        await RedisUtils.deleteCache(productKey);
+        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
 
         return 'Success';
     }
 
     static getProductById = async (req: GetProductByIdRequest) => {
         // Get cache
-        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}${req.id}`; // Get unique key based on id
-        const cacheData = await redis.get(productKey);
+        const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`; // Get unique key based on id
+        const cacheData = await RedisUtils.getCache(productKey);
         if (cacheData) {
-            return JSON.parse(cacheData); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+            return {
+                data: JSON.parse(cacheData), // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+                metadata: {
+                    isFromCache: true
+                }
+            };
         }
 
         const data = await ProductRepository.getProductById(req.id);
         if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound('Product not found');
 
         // Set cache
-        await redis.setex(
+        await RedisUtils.setCache(
+            productKey,
+            CONSTANTS.REDIS.CACHE_EXPIRY,
+            JSON.stringify(data) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
+        );
+
+        return {
+            data,
+            metadata: {
+                isFromCache: false
+            }
+        };
+    }
+
+    static getProductsByFilter = async (req: GetProductsByFilterRequest) => {
+        const productKey = RedisUtils.generateHashedKey(CONSTANTS.REDIS.PRODUCT_KEY, req);
+        const cacheData = await RedisUtils.getCache(productKey);
+        if (cacheData) {
+            return {
+                data: JSON.parse(cacheData),
+                metadata: {
+                    isFromCache: true
+                }
+            };
+        }
+
+        // Can assign sorts and filterFields more than 1
+        const data = await ProductRepository.getProductsByFilter({
+            filterFields: [
+                {
+                    field: PRODUCT_DB_FIELD.deletedAt,
+                    operator: 'equals',
+                    value: null
+                },
+                {
+                    field: PRODUCT_DB_FIELD.name,
+                    operator: 'contains', // Case-sensitive
+                    value: req.name
+                },
+            ],
+            pagination: {
+                page: req.page,
+                pageSize: req.pageSize
+            },
+            sorts: [
+                {
+                    field: req.sort,
+                    order: req.order
+                }
+            ]
+        });
+        if (!data) throw CustomError.notFound('Product not found');
+
+        await RedisUtils.setCache(
             productKey,
             CONSTANTS.REDIS.CACHE_EXPIRY,
             JSON.stringify(data)
-        ) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
+        );
+        /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
+        await RedisUtils.addCacheToList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY, productKey);
 
-        return data;
+        return {
+            data,
+            metadata: {
+                isFromCache: false
+            }
+        };
     }
 }
 

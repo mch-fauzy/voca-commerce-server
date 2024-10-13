@@ -3,7 +3,8 @@ import { Role } from '../models/user-model';
 const CONSTANTS = {
     REDIS: {
         CACHE_EXPIRY: 60 * 60, // In seconds
-        PRODUCT_KEY: 'redisProduct'
+        PRODUCT_KEY: 'product',
+        PRODUCT_FILTER_LIST_KEY: 'product_filter_list'
     },
     ROLES: {
         ADMIN: Role.ADMIN,
@@ -17,6 +18,10 @@ const CONSTANTS = {
         ROLE: 'x-role',
         IAT: 'x-iat',
         EXP: 'x-exp'
+    },
+    PAGINATION: {
+        DEFAULT_PAGE: 1,
+        DEFAULT_PAGESIZE: 10
     }
 };
 

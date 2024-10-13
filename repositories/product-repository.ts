@@ -27,51 +27,41 @@ class ProductRepository {
         }
     }
 
-    static getFilteredProducts = async (filter: Filter) => {
+    static getProductsByFilter = async (filter: Filter) => {
         try {
             const { filterFields, pagination, sorts } = filter;
-            // const where: any = { data };
-            // filterFields.forEach(({ field, operator, value }) => {
-            //     where[field] = {
-            //         [operator]: value
-            //     };
-            // });
 
-            const where: { [key: string]: { [key: string]: string | number | boolean | null } } = {};
-            filterFields.forEach(({ field, operator, value }) => {
-                where[field] = {
-                    [operator]: value
-                };
-            });
+            // Handle filter field (output: create a single object from list)
+            const where = Object.fromEntries(
+                filterFields.map(({ field, operator, value }) => {
+                    return [field, { [operator]: value }];
+                })
+            );
 
             // Handle pagination
             const skip = (pagination.page - 1) * pagination.pageSize;
             const take = pagination.pageSize;
 
-            const orderBy = sorts.map(({ field, order }) => ({ [field]: order }));
+            // Handle sort (output: list of object)
+            const orderBy = sorts.map(({ field, order }) => {
+                if (!field) return {};
+
+                return {
+                    [field]: order
+                };
+            });
 
             const result = await prisma.voca_product.findMany({
                 where,
                 skip,
                 take,
                 orderBy
-            })
+            });
 
             return result;
         } catch (error) {
-            logger.error(`[getProductsByFilter] Error retrieving filtered product(s): ${error}`);
-            throw CustomError.internalServer('Failed to retrieve filtered product(s)');
-        }
-    }
-
-    static getAllProducts = async () => {
-        try {
-            const result = await prisma.voca_product.findMany();
-
-            return result;
-        } catch (error) {
-            logger.error(`[getAllProducts] Error retrieving products ${error}`);
-            throw CustomError.internalServer('Failed to retrieve products');
+            logger.error(`[getProductsByFilter] Error retrieving product(s) by filters: ${error}`);
+            throw CustomError.internalServer('Failed to retrieve product(s) by filters');
         }
     }
 
