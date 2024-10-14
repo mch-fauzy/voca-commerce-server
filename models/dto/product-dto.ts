@@ -29,11 +29,11 @@ interface GetProductByIdRequest {
 }
 
 interface GetProductsByFilterRequest {
+    page: number;
+    pageSize: number;
     name: string;
     sort: string;
     order: string;
-    page: number;
-    pageSize: number;
 }
 
 class ProductValidator {
@@ -62,11 +62,11 @@ class ProductValidator {
     }
 
     private static getProductsByFilterQueryValidate = Joi.object({
-        name: Joi.string().optional(),
-        sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
-        order: Joi.string().optional().valid('asc', 'desc'),
         page: Joi.number().min(1).optional(),
         pageSize: Joi.number().min(1).optional(),
+        name: Joi.string().optional(),
+        sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
+        order: Joi.string().optional().valid('asc', 'desc')
     })
 
     static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
