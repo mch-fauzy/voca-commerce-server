@@ -1,7 +1,11 @@
 import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
 import { Filter } from '../models/filter';
-import { CreateProduct, MarkProductAsDeleted, UpdateProduct } from '../models/product-model';
+import {
+    CreateProduct,
+    MarkProductAsDeleted,
+    UpdateProduct
+} from '../models/product-model';
 import { CustomError } from '../utils/custom-error';
 
 class ProductRepository {

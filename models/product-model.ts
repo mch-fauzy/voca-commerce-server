@@ -12,6 +12,20 @@ const PRODUCT_DB_FIELD = {
     deletedBy: 'deletedBy'
 }
 
+interface Product {
+    id: number,
+    name: string,
+    description: string | null,
+    price: number,
+    available: boolean,
+    createdAt: Date,
+    createdBy: string,
+    updatedAt: Date,
+    updatedBy: string,
+    deletedAt: Date | null,
+    deletedBy: string | null
+}
+
 interface CreateProduct {
     name: string;
     description: string | null;
@@ -34,4 +48,4 @@ interface MarkProductAsDeleted {
     deletedBy: string | null;
 }
 
-export { PRODUCT_DB_FIELD, CreateProduct, UpdateProduct, MarkProductAsDeleted };
+export { PRODUCT_DB_FIELD, Product, CreateProduct, UpdateProduct, MarkProductAsDeleted };

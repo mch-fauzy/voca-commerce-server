@@ -16,7 +16,7 @@ class RedisUtils {
 
     // Store the cache data
     static storeCacheWithExpiry = async (key: string, expiry: number, data: string) => {
-        await redis.setex(
+        return await redis.setex(
             key,
             expiry,
             data
@@ -25,24 +25,26 @@ class RedisUtils {
 
     // Delete a single cache (used for operations like getProductById)
     static deleteCacheByKey = async (key: string) => {
-        await redis.del(key);
+        return await redis.del(key);
     }
 
     /* Used for operations related for complex key like getAllProducts, getProductsByFilter */
     // Add the stored cache in a Redis set for easy invalidation (THIS IS NOT STORE THE CACHE DATA)
     static addCacheToSet = async (setKey: string, key: string) => {
-        await redis.sadd(setKey, key);
+        return await redis.sadd(setKey, key);
     }
 
     // Delete all cache related to set
     static deleteCacheFromSet = async (setKey: string, key?: string) => {
         const keys = await redis.smembers(setKey);
         if (keys && keys.length > 0) {
-            // Delete all cache related to set
-            await redis.del(...keys);
+            return Promise.all([
+                // Delete all cache related to set
+                await redis.del(...keys),
 
-            // Clear the tracking set/set
-            await redis.del(setKey);
+                // Clear the tracking set/set
+                await redis.del(setKey)
+            ]);
         }
     }
 }
