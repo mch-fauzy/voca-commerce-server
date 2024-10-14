@@ -22,7 +22,7 @@ class ProductService {
 
         /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
         // Delete all cache related to set if new data created
-        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY);
+        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY);
 
         return 'Success';
     }
@@ -57,8 +57,8 @@ class ProductService {
 
         // delete the cache
         const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
-        await RedisUtils.deleteCache(productKey);
-        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
+        await RedisUtils.deleteCacheByKey(productKey);
+        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY)
 
         return 'Success';
     }
@@ -70,8 +70,8 @@ class ProductService {
         await ProductRepository.deleteProductById(req.id);
 
         const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
-        await RedisUtils.deleteCache(productKey);
-        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
+        await RedisUtils.deleteCacheByKey(productKey);
+        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY)
 
         return 'Success';
     }
@@ -88,8 +88,8 @@ class ProductService {
         );
 
         const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`;
-        await RedisUtils.deleteCache(productKey);
-        await RedisUtils.deleteCacheFromList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY)
+        await RedisUtils.deleteCacheByKey(productKey);
+        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY)
 
         return 'Success';
     }
@@ -97,7 +97,7 @@ class ProductService {
     static getProductById = async (req: GetProductByIdRequest) => {
         // Get cache
         const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`; // Get unique key based on id
-        const cacheData = await RedisUtils.getCache(productKey);
+        const cacheData = await RedisUtils.getCacheByKey(productKey);
         if (cacheData) {
             return {
                 data: JSON.parse(cacheData), // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
@@ -111,7 +111,7 @@ class ProductService {
         if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound('Product not found');
 
         // Set cache
-        await RedisUtils.setCache(
+        await RedisUtils.storeCacheWithExpiry(
             productKey,
             CONSTANTS.REDIS.CACHE_EXPIRY,
             JSON.stringify(data) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
@@ -126,8 +126,8 @@ class ProductService {
     }
 
     static getProductsByFilter = async (req: GetProductsByFilterRequest) => {
-        const productKey = RedisUtils.generateHashedKey(CONSTANTS.REDIS.PRODUCT_KEY, req);
-        const cacheData = await RedisUtils.getCache(productKey);
+        const productKey = RedisUtils.generateHashedCacheKey(CONSTANTS.REDIS.PRODUCT_KEY, req);
+        const cacheData = await RedisUtils.getCacheByKey(productKey);
         if (cacheData) {
             return {
                 data: JSON.parse(cacheData),
@@ -164,13 +164,13 @@ class ProductService {
         });
         if (!data) throw CustomError.notFound('Product not found');
 
-        await RedisUtils.setCache(
+        await RedisUtils.storeCacheWithExpiry(
             productKey,
             CONSTANTS.REDIS.CACHE_EXPIRY,
             JSON.stringify(data)
         );
         /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
-        await RedisUtils.addCacheToList(CONSTANTS.REDIS.PRODUCT_FILTER_LIST_KEY, productKey);
+        await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY, productKey);
 
         return {
             data,
