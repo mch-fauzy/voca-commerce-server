@@ -64,8 +64,8 @@ class ProductService {
     }
 
     static deleteProductById = async (req: DeleteProductRequest) => {
-        const isExist = await ProductRepository.isProductExistById(req.id);
-        if (!isExist) throw CustomError.notFound('Product not found');
+        const data = await ProductRepository.getProductById(req.id);
+        if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound('Product not found');
 
         await ProductRepository.deleteProductById(req.id);
 
