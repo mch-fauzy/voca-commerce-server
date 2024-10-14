@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 import { ProductValidator } from '../models/dto/product-dto';
 import { ProductService } from '../services/product-service';
 import { CONSTANTS } from '../utils/constants';
-import { responseWithData, responseWithMessage, responseWithMetadata } from '../utils/http-response';
+import { responseWithMessage, responseWithMetadata } from '../utils/http-response';
 
 class ProductController {
     static createProduct = async (req: Request, res: Response, next: NextFunction) => {
