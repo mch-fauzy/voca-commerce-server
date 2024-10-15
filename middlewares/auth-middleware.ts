@@ -9,7 +9,7 @@ import { responseWithMessage } from '../utils/http-response';
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Check if authHeader is exist and get the token only (Bearer <Token>)
+    const token = authHeader?.split(' ')[1]; // Check if authHeader is exist (using optional chaining ?.) and get the token only (Bearer <Token>)
     if (!token) {
         responseWithMessage(res, StatusCodes.UNAUTHORIZED, 'Missing token');
         return;

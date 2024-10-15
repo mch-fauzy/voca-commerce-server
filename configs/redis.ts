@@ -3,7 +3,8 @@ import Redis from 'ioredis';
 import { CONFIG } from './config';
 import { logger } from './winston';
 
-const redis = new Redis(CONFIG.REDIS.URL as string, {
+// ! is Non-null assertion operator
+const redis = new Redis(CONFIG.REDIS.URL!, {
     maxRetriesPerRequest: 5
 });
 
