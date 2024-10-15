@@ -20,9 +20,30 @@ interface DeleteProductRequest {
     id: number;
 }
 
-interface MarkProductAsDeletedRequest {
-    id: number;
+interface MarkProductAsDeletedRequest extends DeleteProductRequest {
     email: string;
+}
+
+interface GetProductByIdRequest {
+    id: number;
+}
+
+interface GetProductsByFilterRequest {
+    page: number;
+    pageSize: number;
+    name: string;
+    sort: string;
+    order: string;
+}
+
+interface ProductResponse {
+    id: number,
+    name: string,
+    description: string | null,
+    price: number,
+    available: boolean,
+    createdAt: Date,
+    updatedAt: Date
 }
 
 class ProductValidator {
@@ -49,6 +70,27 @@ class ProductValidator {
     static validateUpdateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
         return await this.updateProductBodyValidate.validateAsync(body);
     }
+
+    private static getProductsByFilterQueryValidate = Joi.object({
+        page: Joi.number().min(1).optional(),
+        pageSize: Joi.number().min(1).optional(),
+        name: Joi.string().optional(),
+        sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
+        order: Joi.string().optional().valid('asc', 'desc')
+    })
+
+    static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
+        return await this.getProductsByFilterQueryValidate.validateAsync(query);
+    }
 }
 
-export { CreateProductRequest, UpdateProductRequest, DeleteProductRequest, MarkProductAsDeletedRequest, ProductValidator };
+export {
+    CreateProductRequest,
+    UpdateProductRequest,
+    DeleteProductRequest,
+    MarkProductAsDeletedRequest,
+    GetProductByIdRequest,
+    GetProductsByFilterRequest,
+    ProductValidator,
+    ProductResponse
+};

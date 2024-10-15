@@ -2,12 +2,11 @@ interface Filter {
     filterFields: FilterField[];
     pagination: Pagination;
     sorts: Sort[];
-
 }
 
 interface FilterField {
     field: string;
-    operator: 'equals' | 'not' | 'in' | 'notIn' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains' | 'search';
+    operator: 'equals' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains';
     value: string | number | boolean | null;
 }
 
@@ -18,7 +17,7 @@ interface Pagination {
 
 interface Sort {
     field: string;
-    order: 'asc' | 'desc'
+    order: string;
 }
 
-export { Filter }
+export { Filter };
