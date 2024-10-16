@@ -5,25 +5,28 @@ import {
     DeleteProductRequest,
     MarkProductAsDeletedRequest,
     GetProductByIdRequest,
-    GetProductsByFilterRequest,
-    ProductResponse
+    GetProductsByFilterRequest
 } from '../models/dto/product-dto';
 import { CustomError } from '../utils/custom-error';
 import { CONSTANTS } from '../utils/constants';
 import {
-    Product,
     PRODUCT_DB_FIELD
 } from '../models/product-model';
 import { RedisUtils } from '../utils/redis-cache';
 // import { CreateProduct } from '../models/product-model';
 
 class ProductService {
-    private static clearProductCache = async (id: number) => {
+    private static clearProductCacheByIdAndSet = async (id: number) => {
         const key = `${CONSTANTS.REDIS.PRODUCT_KEY}:${id}`;
-        return Promise.all([
+        return await Promise.all([
             RedisUtils.deleteCacheByKey(key),
-            RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY)
+            RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY)
         ]);
+    }
+
+    private static assertProductExistById = async (id: number) => {
+        const productData = await ProductRepository.getProductById(id);
+        if (!productData || productData.deletedAt || productData.deletedBy) throw CustomError.notFound(`Product not found with Id: ${id}`);
     }
 
     static createProduct = async (req: CreateProductRequest) => {
@@ -37,20 +40,17 @@ class ProductService {
                 updatedBy: req.email
             }
         );
-
-        /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
         // Delete all cache related to set if new data created
-        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY);
+        await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
         return 'Success';
     }
 
     static updateProductById = async (req: UpdateProductRequest) => {
-        const data = await ProductRepository.getProductById(req.id);
-        if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound(`Product not found with Id: ${req.id}`);
+        await this.assertProductExistById(req.id);
 
-        // Below will not trigger type error because Excess Property Checks not triggered when CreateProduct object assigned to a variable
         /*
+        // Below will not trigger type error because Excess Property Checks not triggered when CreateProduct object assigned to a variable
         const request: CreateProduct = {
             name: req.name,
             description: req.description,
@@ -73,36 +73,28 @@ class ProductService {
                 updatedBy: req.email
             }
         );
-
-        // delete the cache
-        await this.clearProductCache(req.id)
+        await this.clearProductCacheByIdAndSet(req.id)
 
         return 'Success';
     }
 
     static deleteProductById = async (req: DeleteProductRequest) => {
-        const data = await ProductRepository.getProductById(req.id);
-        if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound(`Product not found with Id: ${req.id}`);
-
+        await this.assertProductExistById(req.id);
         await ProductRepository.deleteProductById(req.id);
-
-        await this.clearProductCache(req.id)
+        await this.clearProductCacheByIdAndSet(req.id)
 
         return 'Success';
     }
 
     static markProductAsDeletedById = async (req: MarkProductAsDeletedRequest) => {
-        const data = await ProductRepository.getProductById(req.id);
-        if (!data || data.deletedAt || data.deletedBy) throw CustomError.notFound(`Product not found with Id: ${req.id}`);
-
+        await this.assertProductExistById(req.id)
         await ProductRepository.updateProductById(req.id,
             {
                 deletedAt: new Date(),
                 deletedBy: req.email
             }
         );
-
-        await this.clearProductCache(req.id)
+        await this.clearProductCacheByIdAndSet(req.id)
 
         return 'Success';
     }
@@ -123,7 +115,6 @@ class ProductService {
         const data = await ProductRepository.getProductById(req.id);
         if (!data) throw CustomError.notFound(`Product not found with Id: ${req.id}`);
 
-        // Set cache
         await RedisUtils.storeCacheWithExpiry(
             productKey,
             CONSTANTS.REDIS.CACHE_EXPIRY,
@@ -152,6 +143,15 @@ class ProductService {
 
         // Can assign sorts and filterFields more than 1
         const data = await ProductRepository.getProductsByFilter({
+            selectFields: [
+                PRODUCT_DB_FIELD.id,
+                PRODUCT_DB_FIELD.name,
+                PRODUCT_DB_FIELD.description,
+                PRODUCT_DB_FIELD.price,
+                PRODUCT_DB_FIELD.available,
+                PRODUCT_DB_FIELD.createdAt,
+                PRODUCT_DB_FIELD.updatedAt
+            ],
             filterFields: [
                 {
                     field: PRODUCT_DB_FIELD.deletedAt,
@@ -176,28 +176,15 @@ class ProductService {
             ]
         });
 
-        const dataResponse: ProductResponse[] = data.map((value: Product) => {
-            return {
-                id: value.id,
-                name: value.name,
-                description: value.description,
-                price: value.price,
-                available: value.available,
-                createdAt: value.createdAt,
-                updatedAt: value.updatedAt
-            }
-        });
-
         await RedisUtils.storeCacheWithExpiry(
             productKey,
             CONSTANTS.REDIS.CACHE_EXPIRY,
-            JSON.stringify(dataResponse)
+            JSON.stringify(data)
         );
-        /*  Used for operations related for complex key like getAllProducts, getProductsByFilter */
-        await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_FILTER_SET_KEY, productKey);
+        await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
 
         return {
-            data: dataResponse,
+            data,
             metadata: {
                 isFromCache: false
             }

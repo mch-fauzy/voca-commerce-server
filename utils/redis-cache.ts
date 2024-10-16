@@ -35,15 +35,15 @@ class RedisUtils {
     }
 
     // Delete all cache related to set
-    static deleteCacheFromSet = async (setKey: string, key?: string) => {
+    static deleteCacheFromSet = async (setKey: string) => {
         const keys = await redis.smembers(setKey);
         if (keys && keys.length > 0) {
-            return Promise.all([
+            return await Promise.all([
                 // Delete all cache related to set
-                await redis.del(...keys),
+                redis.del(...keys),
 
                 // Clear the tracking set/set
-                await redis.del(setKey)
+                redis.del(setKey)
             ]);
         }
     }

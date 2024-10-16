@@ -4,7 +4,7 @@ const CONSTANTS = {
     REDIS: {
         CACHE_EXPIRY: 60 * 60, // In seconds
         PRODUCT_KEY: 'product',
-        PRODUCT_FILTER_SET_KEY: 'product_filter_set'
+        PRODUCT_SET_KEY: 'product_set'
     },
     ROLES: {
         ADMIN: Role.ADMIN,

@@ -1,7 +1,8 @@
 interface Filter {
-    filterFields: FilterField[];
+    selectFields?: string[];
+    filterFields?: FilterField[];
     pagination: Pagination;
-    sorts: Sort[];
+    sorts?: Sort[];
 }
 
 interface FilterField {

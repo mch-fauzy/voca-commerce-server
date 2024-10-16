@@ -33,29 +33,44 @@ class ProductRepository {
 
     static getProductsByFilter = async (filter: Filter) => {
         try {
-            const { filterFields, pagination, sorts } = filter;
+            const { selectFields, filterFields, pagination, sorts } = filter;
+
+            // Handle select specific field
+            const select = selectFields
+                ? Object.fromEntries(
+                    selectFields.map((field) => {
+                        return [field, true];
+                    })
+                )
+                : undefined;
+
 
             // Handle filter field (output: create a single object from list)
-            const where = Object.fromEntries(
-                filterFields.map(({ field, operator, value }) => {
-                    return [field, { [operator]: value }];
-                })
-            );
+            const where = filterFields
+                ? Object.fromEntries(
+                    filterFields.map(({ field, operator, value }) => {
+                        return [field, { [operator]: value }];
+                    })
+                )
+                : undefined;
 
             // Handle pagination
             const skip = (pagination.page - 1) * pagination.pageSize;
             const take = pagination.pageSize;
 
             // Handle sort (output: list of object)
-            const orderBy = sorts.map(({ field, order }) => {
-                if (!field) return {};
+            const orderBy = sorts
+                ? sorts.map(({ field, order }) => {
+                    if (!field) return {};
 
-                return {
-                    [field]: order
-                };
-            });
+                    return {
+                        [field]: order
+                    };
+                })
+                : undefined;
 
             const result = await prisma.voca_product.findMany({
+                select,
                 where,
                 skip,
                 take,

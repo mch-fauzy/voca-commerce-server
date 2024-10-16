@@ -36,16 +36,6 @@ interface GetProductsByFilterRequest {
     order: string;
 }
 
-interface ProductResponse {
-    id: number,
-    name: string,
-    description: string | null,
-    price: number,
-    available: boolean,
-    createdAt: Date,
-    updatedAt: Date
-}
-
 class ProductValidator {
     // Create product section
     private static createProductBodyValidate = Joi.object({
@@ -91,6 +81,5 @@ export {
     MarkProductAsDeletedRequest,
     GetProductByIdRequest,
     GetProductsByFilterRequest,
-    ProductValidator,
-    ProductResponse
+    ProductValidator
 };
