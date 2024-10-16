@@ -9,7 +9,8 @@ productRouterV1.post('/products', authenticateToken, authorizeAdmin, ProductCont
 productRouterV1.get('/products/:id', authenticateToken, authorizeAdmin, ProductController.getProductById);
 productRouterV1.delete('/products/:id', authenticateToken, authorizeAdmin, ProductController.deleteProductById);
 productRouterV1.patch('/products/:id', authenticateToken, authorizeAdmin, ProductController.updateProductById);
-productRouterV1.patch('/products/:id/deleted', authenticateToken, authorizeAdmin, ProductController.markProductAsDeletedById);
+productRouterV1.patch('/products/:id/soft-delete', authenticateToken, authorizeAdmin, ProductController.softDeleteProductById);
+productRouterV1.patch('/products/:id/restore', authenticateToken, authorizeAdmin, ProductController.restoreProductById);
 
 productRouterV1.get('/products', authenticateToken, ProductController.getProductsByFilter);
 

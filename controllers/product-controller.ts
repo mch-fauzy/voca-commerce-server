@@ -65,15 +65,29 @@ class ProductController {
         }
     }
 
-    static markProductAsDeletedById = async (req: Request, res: Response, next: NextFunction) => {
+    static softDeleteProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            // Assign object explicitly to enforce strict type (Excess Property Checks)
-            const result = await ProductService.markProductAsDeletedById(
+            const result = await ProductService.softDeleteProductById(
                 {
                     id: Number(id),
                     email,
+                }
+            );
+
+            responseWithMessage(res, StatusCodes.OK, result);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    static restoreProductById = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { id } = req.params;
+            const result = await ProductService.restoreProductById(
+                {
+                    id: Number(id)
                 }
             );
 

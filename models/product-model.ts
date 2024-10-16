@@ -29,7 +29,7 @@ interface UpdateProduct {
     updatedBy: string;
 }
 
-interface MarkProductAsDeleted {
+interface SoftDeleteProduct {
     deletedAt: Date | null;
     deletedBy: string | null;
 }
@@ -38,5 +38,5 @@ export {
     PRODUCT_DB_FIELD,
     CreateProduct,
     UpdateProduct,
-    MarkProductAsDeleted
+    SoftDeleteProduct
 };

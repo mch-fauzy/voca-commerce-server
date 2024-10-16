@@ -23,6 +23,10 @@ class CustomError extends Error {
         return new CustomError(message, StatusCodes.UNAUTHORIZED)
     }
 
+    static forbidden = (message: string) => {
+        return new CustomError(message, StatusCodes.FORBIDDEN)
+    }
+
     static internalServer = (message: string) => {
         return new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR)
     }

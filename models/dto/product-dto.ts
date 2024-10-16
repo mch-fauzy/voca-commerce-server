@@ -20,7 +20,7 @@ interface DeleteProductRequest {
     id: number;
 }
 
-interface MarkProductAsDeletedRequest extends DeleteProductRequest {
+interface SoftDeleteProductRequest extends DeleteProductRequest {
     email: string;
 }
 
@@ -78,7 +78,7 @@ export {
     CreateProductRequest,
     UpdateProductRequest,
     DeleteProductRequest,
-    MarkProductAsDeletedRequest,
+    SoftDeleteProductRequest,
     GetProductByIdRequest,
     GetProductsByFilterRequest,
     ProductValidator
