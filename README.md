@@ -1,4 +1,5 @@
-# Voca Commerce Server
+# Voca Commerce  (STATUS: IN PROGRESS)
+REST API server that handles users, products, wallets, transactions, and related features. The system includes roles for managing access (ADMIN and USER), user wallets for transactions, and a product system where users can buy products through their wallets. Redis cache is integrated to optimize performance by caching frequently accessed data, such as product listings and transaction statuses
 
 ## Table of Contents
 * [Technologies Used](#technologies-used)
@@ -11,6 +12,12 @@
 - Postgresql - version 14.13.0
 
 ## Features
+- User Management
+- Product Management
+- Wallet Management
+- Transaction Handling
+- Soft Delete
+- Role-based Access Control
 
 ## Setup
 To run this project in local, follow the steps below:
