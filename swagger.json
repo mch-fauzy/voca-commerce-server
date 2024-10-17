@@ -2,7 +2,7 @@
     "openapi": "3.0.3",
     "info": {
         "title": "Voca Commerce Server",
-        "description": "API for managing commerce interaction",
+        "description": "REST API server that handles users, products, wallets, transactions, and related feature",
         "version": "1.0.0"
     },
     "servers": [
