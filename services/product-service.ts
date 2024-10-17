@@ -9,27 +9,12 @@ import {
 } from '../models/dto/product-dto';
 import { CustomError } from '../utils/custom-error';
 import { CONSTANTS } from '../utils/constants';
-import {
-    PRODUCT_DB_FIELD
-} from '../models/product-model';
+import { PRODUCT_DB_FIELD } from '../models/product-model';
 import { RedisUtils } from '../utils/redis-cache';
 import { logger } from '../configs/winston';
 // import { CreateProduct } from '../models/product-model';
 
 class ProductService {
-    private static clearProductCacheByIdAndSet = async (id: number) => {
-        try {
-            const key = `${CONSTANTS.REDIS.PRODUCT_KEY}:${id}`;
-            return await Promise.all([
-                RedisUtils.deleteCacheByKey(key),
-                RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY)
-            ]);
-        } catch (error) {
-            logger.error(`[clearProductCacheByIdAndSet] Service error clearing cache for product with id ${id} and set ${CONSTANTS.REDIS.PRODUCT_SET_KEY}: ${error}`);
-            throw CustomError.internalServer('Service Failed to clear product cache');
-        }
-    }
-
     static createProduct = async (req: CreateProductRequest) => {
         try {
             await ProductRepository.createProduct(
@@ -42,6 +27,7 @@ class ProductService {
                     updatedBy: req.email
                 }
             );
+
             // Delete all cache related to set if new data created
             await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
@@ -85,7 +71,9 @@ class ProductService {
                     updatedBy: req.email
                 }
             );
-            await this.clearProductCacheByIdAndSet(req.id)
+
+            await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
+            await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
             return 'Success';
         } catch (error) {
@@ -110,7 +98,9 @@ class ProductService {
                     deletedBy: req.email
                 }
             );
-            await this.clearProductCacheByIdAndSet(req.id)
+
+            await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
+            await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
             return 'Success';
         } catch (error) {
@@ -136,7 +126,9 @@ class ProductService {
                     deletedBy: null
                 }
             );
-            await this.clearProductCacheByIdAndSet(req.id)
+
+            await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
+            await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
             return 'Success';
         } catch (error) {
@@ -157,7 +149,9 @@ class ProductService {
             if (!isProductMarkedAsDeleted) throw CustomError.forbidden(`Product with id ${req.id} is not marked as deleted`);
 
             await ProductRepository.deleteProductById(req.id);
-            await this.clearProductCacheByIdAndSet(req.id)
+
+            await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
+            await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
 
             return 'Success';
         } catch (error) {
@@ -219,7 +213,7 @@ class ProductService {
             }
 
             // Can assign sorts and filterFields more than 1
-            const data = await ProductRepository.getProductsByFilter({
+            const productsData = await ProductRepository.getProductsByFilter({
                 selectFields: [
                     PRODUCT_DB_FIELD.id,
                     PRODUCT_DB_FIELD.name,
@@ -256,12 +250,12 @@ class ProductService {
             await RedisUtils.storeCacheWithExpiry(
                 productKey,
                 CONSTANTS.REDIS.CACHE_EXPIRY,
-                JSON.stringify(data)
+                JSON.stringify(productsData)
             );
             await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
 
             return {
-                data,
+                data: productsData,
                 metadata: {
                     isFromCache: false
                 }
