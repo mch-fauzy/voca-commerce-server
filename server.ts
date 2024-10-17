@@ -1,5 +1,6 @@
 import express, { json } from 'express';
 import { createServer } from 'http';
+import cors from 'cors';
 
 import { CONFIG } from './configs/config';
 import { initDbConnection, initRedisConnection } from './utils/connection-check';
@@ -10,6 +11,7 @@ import { router } from './routes';
 const PORT = CONFIG.SERVER.PORT;
 const app = express();
 
+app.use(cors());
 app.use(json());
 app.use('/', router);
 // Register the error handling middleware
