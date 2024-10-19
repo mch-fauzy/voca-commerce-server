@@ -20,26 +20,26 @@ class ProductValidator {
 exports.ProductValidator = ProductValidator;
 _a = ProductValidator;
 // Create product section
-ProductValidator.createProductBodyValidate = joi_1.default.object({
+ProductValidator.createProductBodyValidator = joi_1.default.object({
     name: joi_1.default.string().required(),
     description: joi_1.default.string().optional().allow(null),
     price: joi_1.default.number().min(0).required(),
     available: joi_1.default.boolean().required(),
 });
 ProductValidator.validateCreateProductBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.createProductBodyValidate.validateAsync(body);
+    return yield _a.createProductBodyValidator.validateAsync(body);
 });
 // Update product section
-ProductValidator.updateProductBodyValidate = joi_1.default.object({
+ProductValidator.updateProductBodyValidator = joi_1.default.object({
     name: joi_1.default.string().optional(),
     description: joi_1.default.string().optional().allow(null),
     price: joi_1.default.number().min(0).optional(),
     available: joi_1.default.boolean().optional(),
 }).or('name', 'description', 'price', 'available'); // At least one field must be present
 ProductValidator.validateUpdateProductBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.updateProductBodyValidate.validateAsync(body);
+    return yield _a.updateProductBodyValidator.validateAsync(body);
 });
-ProductValidator.getProductsByFilterQueryValidate = joi_1.default.object({
+ProductValidator.getProductsByFilterQueryValidator = joi_1.default.object({
     page: joi_1.default.number().min(1).optional(),
     pageSize: joi_1.default.number().min(1).optional(),
     name: joi_1.default.string().optional(),
@@ -47,5 +47,5 @@ ProductValidator.getProductsByFilterQueryValidate = joi_1.default.object({
     order: joi_1.default.string().optional().valid('asc', 'desc')
 });
 ProductValidator.validateGetProductsByFilterQuery = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.getProductsByFilterQueryValidate.validateAsync(query);
+    return yield _a.getProductsByFilterQueryValidator.validateAsync(query);
 });

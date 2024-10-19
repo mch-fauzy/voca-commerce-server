@@ -24,17 +24,27 @@ ProductRepository.createProduct = (data) => __awaiter(void 0, void 0, void 0, fu
         return createdData;
     }
     catch (error) {
-        winston_1.logger.error(`[createProduct] Error creating product: ${error}`);
+        winston_1.logger.error(`[createProduct] Repository error creating product: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to create product');
     }
 });
-ProductRepository.getProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield prisma_client_1.prisma.voca_product.findUnique({ where: { id: id } });
+        const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
+        // Handle select specific field
+        const select = selectFields
+            ? Object.fromEntries(selectFields.map((field) => {
+                return [field, true];
+            }))
+            : undefined;
+        const productData = yield prisma_client_1.prisma.voca_product.findUnique({
+            where: { id: id },
+            select
+        });
         return productData;
     }
     catch (error) {
-        winston_1.logger.error(`[getProductById] Error retrieving product by id: ${error}`);
+        winston_1.logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to retrieve product by id');
     }
 });
@@ -76,7 +86,7 @@ ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, vo
         return productsData;
     }
     catch (error) {
-        winston_1.logger.error(`[getProductsByFilter] Error retrieving products by filter: ${error}`);
+        winston_1.logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to retrieve products by filter');
     }
 });
@@ -89,7 +99,7 @@ ProductRepository.isProductExistById = (id) => __awaiter(void 0, void 0, void 0,
         return productData ? true : false;
     }
     catch (error) {
-        winston_1.logger.error('[isProductExistById] Error checking product by id');
+        winston_1.logger.error('[isProductExistById] Repository error checking product by id');
         throw custom_error_1.CustomError.internalServer('Failed to check product by id');
     }
 });
@@ -102,7 +112,7 @@ ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, vo
         return updatedData;
     }
     catch (error) {
-        winston_1.logger.error(`[updateProductById] Error updating product by id: ${error}`);
+        winston_1.logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to update product by id');
     }
 });
@@ -112,7 +122,7 @@ ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, 
         return deletedData;
     }
     catch (error) {
-        winston_1.logger.error(`[deleteProductById] Error deleting product by id: ${error}`);
+        winston_1.logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to delete product by id');
     }
 });

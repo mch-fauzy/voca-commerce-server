@@ -14,12 +14,17 @@ const authenticateToken = (req, res, next) => {
         return;
     }
     (0, jsonwebtoken_1.verify)(token, String(config_1.CONFIG.APP.JWT_ACCESS_KEY), (error, decodedToken) => {
-        if (error) {
+        if (error || !decodedToken) {
             (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Invalid token');
             return;
         }
-        // Set decoded token details to custom headers
         const decodedTokenPayload = decodedToken;
+        // Check if email and role are present
+        if (!decodedTokenPayload.email || !decodedTokenPayload.role) {
+            (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Incomplete token payload');
+            return;
+        }
+        // Set decoded token details to custom headers
         req.headers[constants_1.CONSTANTS.HEADERS.EMAIL] = decodedTokenPayload.email;
         req.headers[constants_1.CONSTANTS.HEADERS.ROLE] = decodedTokenPayload.role;
         req.headers[constants_1.CONSTANTS.HEADERS.IAT] = String(decodedTokenPayload.iat);
