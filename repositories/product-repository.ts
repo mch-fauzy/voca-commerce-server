@@ -20,9 +20,23 @@ class ProductRepository {
         }
     }
 
-    static getProductById = async (id: number) => {
+    static getProductById = async (id: number, fields?: Pick<Filter, 'selectFields'>) => {
         try {
-            const productData = await prisma.voca_product.findUnique({ where: { id: id } });
+            const { selectFields } = fields ?? {};
+
+            // Handle select specific field
+            const select = selectFields
+                ? Object.fromEntries(
+                    selectFields.map((field) => {
+                        return [field, true];
+                    })
+                )
+                : undefined;
+
+            const productData = await prisma.voca_product.findUnique({
+                where: { id: id },
+                select
+            });
 
             return productData;
         } catch (error) {
