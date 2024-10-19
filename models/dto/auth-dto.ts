@@ -3,30 +3,50 @@ import { JwtPayload } from "jsonwebtoken";
 
 import { Role } from "../user-model";
 
-interface RegisterRequest {
+interface AuthBody {
     email: string;
     password: string;
-    role: Role;
 }
 
-const registerValidate = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).required()
-});
+interface RegisterRequest extends AuthBody {
+    role: Role;
+}
 
 interface LoginRequest {
     email: string;
     password: string;
 }
 
-const loginValidate = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required()
-});
-
 interface TokenPayload extends JwtPayload {
     email: string;
     role: Role;
 }
 
-export { RegisterRequest, registerValidate, LoginRequest, loginValidate, TokenPayload };
+class AuthValidator {
+    // Register section
+    private static registerBodyValidator = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required()
+    });
+
+    static validateRegisterBody = async (body: AuthBody): Promise<AuthBody> => {
+        return await this.registerBodyValidator.validateAsync(body);
+    }
+
+    // Login section
+    private static loginBodyValidator = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().required()
+    });
+
+    static validateLoginBody = async (body: AuthBody): Promise<AuthBody> => {
+        return await this.loginBodyValidator.validateAsync(body);
+    }
+}
+
+export {
+    RegisterRequest,
+    LoginRequest,
+    TokenPayload,
+    AuthValidator
+};

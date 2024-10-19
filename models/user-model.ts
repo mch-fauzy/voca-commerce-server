@@ -1,5 +1,19 @@
 import { voca_role as Role } from "@prisma/client";
 
+const USER_DB_FIELD = {
+    id: 'id',
+    email: 'email',
+    password: 'password',
+    role: 'role',
+    createdAt: 'createdAt',
+    createdBy: 'createdBy',
+    updatedAt: 'updatedAt',
+    updatedBy: 'updatedBy',
+    deletedAt: 'deletedAt',
+    deletedBy: 'deletedBy'
+}
+
+// Other fields either auto generated (like createdAt and updatedAt) or nullable (like deletedAt and deletedBy)
 interface CreateUser {
     id: string;
     email: string;
@@ -9,4 +23,8 @@ interface CreateUser {
     updatedBy: string;
 }
 
-export { CreateUser, Role };
+export {
+    USER_DB_FIELD,
+    CreateUser,
+    Role
+};
