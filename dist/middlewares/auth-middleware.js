@@ -13,7 +13,7 @@ const authenticateToken = (req, res, next) => {
         (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Missing token');
         return;
     }
-    (0, jsonwebtoken_1.verify)(token, String(config_1.CONFIG.APP.JWT_ACCESS_KEY), (error, decodedToken) => {
+    (0, jsonwebtoken_1.verify)(token, config_1.CONFIG.APP.JWT_ACCESS_KEY, (error, decodedToken) => {
         if (error || !decodedToken) {
             (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Invalid token');
             return;

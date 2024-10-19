@@ -17,6 +17,12 @@ interface LoginRequest {
     password: string;
 }
 
+interface LoginResponse {
+    token: string;
+    tokenType: string;
+    expiresIn: number;
+}
+
 interface TokenPayload extends JwtPayload {
     email: string;
     role: Role;
@@ -48,5 +54,6 @@ export {
     RegisterRequest,
     LoginRequest,
     TokenPayload,
+    LoginResponse,
     AuthValidator
 };

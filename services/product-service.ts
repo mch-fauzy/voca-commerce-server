@@ -5,13 +5,16 @@ import {
     DeleteProductRequest,
     SoftDeleteProductRequest,
     GetProductByIdRequest,
-    GetProductsByFilterRequest
+    GetProductsByFilterRequest,
+    GetProductsByFilterResponse,
+    GetProductByIdResponse
 } from '../models/dto/product-dto';
 import { CustomError } from '../utils/custom-error';
 import { CONSTANTS } from '../utils/constants';
 import { PRODUCT_DB_FIELD } from '../models/product-model';
 import { RedisUtils } from '../utils/redis-cache';
 import { logger } from '../configs/winston';
+import { calculatePaginationMetadata } from '../utils/calculate-pagination';
 // import { CreateProduct } from '../models/product-model';
 
 class ProductService {
@@ -40,11 +43,11 @@ class ProductService {
 
     static updateProductById = async (req: UpdateProductRequest) => {
         try {
-            const productData = await ProductRepository.getProductById(req.id);
-            if (!productData) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            const product = await ProductRepository.getProductById(req.id);
+            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
 
             // Prevent updating if product is marked as deleted, unless it's being restored
-            const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+            const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (isProductMarkedAsDeleted) throw CustomError.forbidden(`Product with id ${req.id} is marked as deleted and cannot be updated.`);
 
             /*
@@ -86,10 +89,10 @@ class ProductService {
 
     static softDeleteProductById = async (req: SoftDeleteProductRequest) => {
         try {
-            const productData = await ProductRepository.getProductById(req.id);
-            if (!productData) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            const product = await ProductRepository.getProductById(req.id);
+            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
 
-            const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+            const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} is already marked as deleted.`);
 
             await ProductRepository.updateProductById(req.id,
@@ -113,11 +116,11 @@ class ProductService {
 
     static restoreProductById = async (req: Pick<SoftDeleteProductRequest, 'id'>) => {
         try {
-            const productData = await ProductRepository.getProductById(req.id);
-            if (!productData) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            const product = await ProductRepository.getProductById(req.id);
+            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
 
             // Prevent restore if product not marked as deleted
-            const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+            const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (!isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} cannot be restored because it is not marked as deleted`);
 
             await ProductRepository.updateProductById(req.id,
@@ -141,11 +144,11 @@ class ProductService {
 
     static deleteProductById = async (req: DeleteProductRequest) => {
         try {
-            const productData = await ProductRepository.getProductById(req.id);
-            if (!productData) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            const product = await ProductRepository.getProductById(req.id);
+            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
 
             // Additional security to reduce accident caused by deletion
-            const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+            const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (!isProductMarkedAsDeleted) throw CustomError.forbidden(`Product with id ${req.id} is not marked as deleted`);
 
             await ProductRepository.deleteProductById(req.id);
@@ -166,31 +169,32 @@ class ProductService {
         try {
             // Get cache
             const productKey = `${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`; // Get unique key based on id
-            const cacheData = await RedisUtils.getCacheByKey(productKey);
-            if (cacheData) {
-                return {
-                    data: JSON.parse(cacheData), // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
-                    metadata: {
-                        isFromCache: true
-                    }
+            const productCache = await RedisUtils.getCacheByKey(productKey);
+            if (productCache) {
+                if (productCache) {
+                    const productCacheResponse: GetProductByIdResponse = JSON.parse(productCache); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+                    productCacheResponse.metadata.isFromCache = true;
+                    return productCacheResponse;
                 };
             }
 
-            const productData = await ProductRepository.getProductById(req.id);
-            if (!productData) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            const product = await ProductRepository.getProductById(req.id);
+            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+
+            const response: GetProductByIdResponse = {
+                data: product,
+                metadata: {
+                    isFromCache: false
+                }
+            }
 
             await RedisUtils.storeCacheWithExpiry(
                 productKey,
                 CONSTANTS.REDIS.CACHE_EXPIRY,
-                JSON.stringify(productData) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
+                JSON.stringify(response) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
             );
 
-            return {
-                data: productData,
-                metadata: {
-                    isFromCache: false
-                }
-            };
+            return response;
         } catch (error) {
             if (error instanceof CustomError) throw error;
 
@@ -202,18 +206,15 @@ class ProductService {
     static getProductsByFilter = async (req: GetProductsByFilterRequest) => {
         try {
             const productKey = RedisUtils.generateHashedCacheKey(CONSTANTS.REDIS.PRODUCT_KEY, req);
-            const cacheData = await RedisUtils.getCacheByKey(productKey);
-            if (cacheData) {
-                return {
-                    data: JSON.parse(cacheData),
-                    metadata: {
-                        isFromCache: true
-                    }
-                };
+            const productsCache = await RedisUtils.getCacheByKey(productKey);
+            if (productsCache) {
+                const productsCacheResponse: GetProductsByFilterResponse = JSON.parse(productsCache);
+                productsCacheResponse.metadata.isFromCache = true;
+                return productsCacheResponse;
             }
 
             // Can assign sorts and filterFields more than 1
-            const productsData = await ProductRepository.getProductsByFilter({
+            const products = await ProductRepository.getProductsByFilter({
                 selectFields: [
                     PRODUCT_DB_FIELD.id,
                     PRODUCT_DB_FIELD.name,
@@ -247,19 +248,26 @@ class ProductService {
                 ]
             });
 
-            await RedisUtils.storeCacheWithExpiry(
-                productKey,
-                CONSTANTS.REDIS.CACHE_EXPIRY,
-                JSON.stringify(productsData)
-            );
-            await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
-
-            return {
-                data: productsData,
+            const pagination = calculatePaginationMetadata(products.count, req.page, req.pageSize);
+            const response: GetProductsByFilterResponse = {
+                data: products.data,
                 metadata: {
+                    totalPages: pagination.totalPages,
+                    currentPage: pagination.currentPage,
+                    nextPage: pagination.nextPage,
+                    previousPage: pagination.previousPage,
                     isFromCache: false
                 }
             };
+
+            await RedisUtils.storeCacheWithExpiry(
+                productKey,
+                CONSTANTS.REDIS.CACHE_EXPIRY,
+                JSON.stringify(response)
+            );
+            await RedisUtils.addCacheToSet(CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
+
+            return response;
         } catch (error) {
             logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve products by filter');

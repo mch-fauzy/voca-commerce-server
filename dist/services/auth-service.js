@@ -48,25 +48,23 @@ AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
 });
 AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userData = yield user_repository_1.UserRepository.getUserByEmail(req.email, {
+        const user = yield user_repository_1.UserRepository.getUserByEmail(req.email, {
             selectFields: [
                 user_model_1.USER_DB_FIELD.email,
                 user_model_1.USER_DB_FIELD.password,
                 user_model_1.USER_DB_FIELD.role
             ]
         });
-        if (!userData)
+        if (!user)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
-        const isValidPassword = yield (0, password_1.comparePassword)(req.password, userData.password);
+        const isValidPassword = yield (0, password_1.comparePassword)(req.password, user.password);
         if (!isValidPassword)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
-        const token = (0, jwt_1.generateToken)({
-            email: userData.email,
-            role: userData.role
+        const response = (0, jwt_1.generateToken)({
+            email: user.email,
+            role: user.role
         });
-        return {
-            token: token
-        };
+        return response;
     }
     catch (error) {
         if (error instanceof custom_error_1.CustomError)

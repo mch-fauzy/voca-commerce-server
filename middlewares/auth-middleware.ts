@@ -15,7 +15,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
         return;
     }
 
-    verify(token, String(CONFIG.APP.JWT_ACCESS_KEY), (error, decodedToken) => {
+    verify(token, CONFIG.APP.JWT_ACCESS_KEY!, (error, decodedToken) => {
         if (error || !decodedToken) {
             responseWithMessage(res, StatusCodes.UNAUTHORIZED, 'Invalid token');
             return;

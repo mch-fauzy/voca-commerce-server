@@ -1,5 +1,7 @@
 import Joi from 'joi';
 
+import { Metadata } from './metadata';
+
 interface ProductRequestBody {
     name: string;
     description: string | null;
@@ -28,12 +30,22 @@ interface GetProductByIdRequest {
     id: number;
 }
 
+interface GetProductByIdResponse {
+    data: object;
+    metadata: Pick<Metadata, 'isFromCache'>;
+}
+
 interface GetProductsByFilterRequest {
     page: number;
     pageSize: number;
     name: string;
     sort: string;
     order: string;
+}
+
+interface GetProductsByFilterResponse {
+    data: object[];
+    metadata: Metadata;
 }
 
 class ProductValidator {
@@ -81,5 +93,7 @@ export {
     SoftDeleteProductRequest,
     GetProductByIdRequest,
     GetProductsByFilterRequest,
+    GetProductByIdResponse,
+    GetProductsByFilterResponse,
     ProductValidator
 };

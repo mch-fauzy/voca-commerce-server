@@ -13,7 +13,7 @@ const CONSTANTS = {
         USER: user_model_1.Role.USER
     },
     JWT: {
-        EXPIRY: '1h'
+        EXPIRY: 60 * 60
     },
     HEADERS: {
         EMAIL: 'x-email',
@@ -24,6 +24,9 @@ const CONSTANTS = {
     PAGINATION: {
         DEFAULT_PAGE: 1,
         DEFAULT_PAGESIZE: 10
+    },
+    SERVER: {
+        DEFAULT_PORT: 3000
     }
 };
 exports.CONSTANTS = CONSTANTS;

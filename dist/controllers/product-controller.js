@@ -25,14 +25,14 @@ ProductController.createProduct = (req, res, next) => __awaiter(void 0, void 0, 
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
         const body = yield product_dto_1.ProductValidator.validateCreateProductBody(req.body);
         // Assign object explicitly to enforce strict type (Excess Property Checks)
-        const result = yield product_service_1.ProductService.createProduct({
+        const message = yield product_service_1.ProductService.createProduct({
             email,
             name: body.name,
             description: body.description,
             price: body.price,
             available: body.available,
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, result);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, message);
     }
     catch (error) {
         next(error);
@@ -43,7 +43,7 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
         const { id } = req.params;
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
         const body = yield product_dto_1.ProductValidator.validateUpdateProductBody(req.body);
-        const result = yield product_service_1.ProductService.updateProductById({
+        const message = yield product_service_1.ProductService.updateProductById({
             id: Number(id),
             email,
             name: body.name,
@@ -51,7 +51,7 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
             price: body.price,
             available: body.available
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, result);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
     }
     catch (error) {
         next(error);
@@ -60,10 +60,10 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
 ProductController.deleteProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const result = yield product_service_1.ProductService.deleteProductById({
+        const message = yield product_service_1.ProductService.deleteProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, result);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
     }
     catch (error) {
         next(error);
@@ -73,11 +73,11 @@ ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, 
     try {
         const { id } = req.params;
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const result = yield product_service_1.ProductService.softDeleteProductById({
+        const message = yield product_service_1.ProductService.softDeleteProductById({
             id: Number(id),
             email,
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, result);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
     }
     catch (error) {
         next(error);
@@ -86,10 +86,10 @@ ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, 
 ProductController.restoreProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const result = yield product_service_1.ProductService.restoreProductById({
+        const message = yield product_service_1.ProductService.restoreProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, result);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
     }
     catch (error) {
         next(error);

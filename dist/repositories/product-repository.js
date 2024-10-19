@@ -20,8 +20,8 @@ exports.ProductRepository = ProductRepository;
 _a = ProductRepository;
 ProductRepository.createProduct = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const createdData = yield prisma_client_1.prisma.voca_product.create({ data: data });
-        return createdData;
+        const createdProduct = yield prisma_client_1.prisma.voca_product.create({ data: data });
+        return createdProduct;
     }
     catch (error) {
         winston_1.logger.error(`[createProduct] Repository error creating product: ${error}`);
@@ -37,11 +37,11 @@ ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, voi
                 return [field, true];
             }))
             : undefined;
-        const productData = yield prisma_client_1.prisma.voca_product.findUnique({
+        const product = yield prisma_client_1.prisma.voca_product.findUnique({
             where: { id: id },
             select
         });
-        return productData;
+        return product;
     }
     catch (error) {
         winston_1.logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
@@ -76,14 +76,22 @@ ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, vo
                 };
             })
             : undefined;
-        const productsData = yield prisma_client_1.prisma.voca_product.findMany({
-            select,
-            where,
-            skip,
-            take,
-            orderBy
-        });
-        return productsData;
+        const [products, totalProducts] = yield prisma_client_1.prisma.$transaction([
+            prisma_client_1.prisma.voca_product.findMany({
+                select,
+                where,
+                skip,
+                take,
+                orderBy
+            }),
+            prisma_client_1.prisma.voca_product.count({
+                where
+            })
+        ]);
+        return {
+            data: products,
+            count: totalProducts
+        };
     }
     catch (error) {
         winston_1.logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
@@ -92,11 +100,11 @@ ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, vo
 });
 ProductRepository.isProductExistById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield prisma_client_1.prisma.voca_product.findUnique({
+        const product = yield prisma_client_1.prisma.voca_product.findUnique({
             where: { id: id },
             select: { id: true }
         });
-        return productData ? true : false;
+        return product ? true : false;
     }
     catch (error) {
         winston_1.logger.error('[isProductExistById] Repository error checking product by id');
@@ -105,11 +113,11 @@ ProductRepository.isProductExistById = (id) => __awaiter(void 0, void 0, void 0,
 });
 ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const updatedData = yield prisma_client_1.prisma.voca_product.update({
+        const updatedProduct = yield prisma_client_1.prisma.voca_product.update({
             where: { id: id },
             data: data
         });
-        return updatedData;
+        return updatedProduct;
     }
     catch (error) {
         winston_1.logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
@@ -118,8 +126,8 @@ ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, vo
 });
 ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deletedData = yield prisma_client_1.prisma.voca_product.delete({ where: { id: id } });
-        return deletedData;
+        const deletedProduct = yield prisma_client_1.prisma.voca_product.delete({ where: { id: id } });
+        return deletedProduct;
     }
     catch (error) {
         winston_1.logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);

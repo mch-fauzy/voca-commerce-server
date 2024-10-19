@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserRepository } from '../repositories/user-repository';
 import {
     RegisterRequest,
-    LoginRequest
+    LoginRequest,
+    LoginResponse
 } from '../models/dto/auth-dto';
 import {
     comparePassword,
@@ -42,26 +43,24 @@ class AuthService {
 
     static login = async (req: LoginRequest) => {
         try {
-            const userData = await UserRepository.getUserByEmail(req.email, {
+            const user = await UserRepository.getUserByEmail(req.email, {
                 selectFields: [
                     USER_DB_FIELD.email,
                     USER_DB_FIELD.password,
                     USER_DB_FIELD.role
                 ]
             });
-            if (!userData) throw CustomError.unauthorized('Invalid credentials');
+            if (!user) throw CustomError.unauthorized('Invalid credentials');
 
-            const isValidPassword = await comparePassword(req.password, userData.password);
+            const isValidPassword = await comparePassword(req.password, user.password);
             if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
 
-            const token = generateToken({
-                email: userData.email,
-                role: userData.role
+            const response: LoginResponse = generateToken({
+                email: user.email,
+                role: user.role
             });
 
-            return {
-                token: token
-            };
+            return response;
         } catch (error) {
             if (error instanceof CustomError) throw error;
 

@@ -12,7 +12,7 @@ class ProductController {
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
             const body = await ProductValidator.validateCreateProductBody(req.body);
             // Assign object explicitly to enforce strict type (Excess Property Checks)
-            const result = await ProductService.createProduct(
+            const message = await ProductService.createProduct(
                 {
                     email,
                     name: body.name,
@@ -22,7 +22,7 @@ class ProductController {
                 }
             );
 
-            responseWithMessage(res, StatusCodes.CREATED, result);
+            responseWithMessage(res, StatusCodes.CREATED, message);
         } catch (error) {
             next(error);
         }
@@ -33,7 +33,7 @@ class ProductController {
             const { id } = req.params;
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
             const body = await ProductValidator.validateUpdateProductBody(req.body);
-            const result = await ProductService.updateProductById(
+            const message = await ProductService.updateProductById(
                 {
                     id: Number(id),
                     email,
@@ -44,7 +44,7 @@ class ProductController {
                 }
             );
 
-            responseWithMessage(res, StatusCodes.OK, result);
+            responseWithMessage(res, StatusCodes.OK, message);
         } catch (error) {
             next(error);
         }
@@ -53,13 +53,13 @@ class ProductController {
     static deleteProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const result = await ProductService.deleteProductById(
+            const message = await ProductService.deleteProductById(
                 {
                     id: Number(id)
                 }
             );
 
-            responseWithMessage(res, StatusCodes.OK, result);
+            responseWithMessage(res, StatusCodes.OK, message);
         } catch (error) {
             next(error);
         }
@@ -69,14 +69,14 @@ class ProductController {
         try {
             const { id } = req.params;
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            const result = await ProductService.softDeleteProductById(
+            const message = await ProductService.softDeleteProductById(
                 {
                     id: Number(id),
                     email,
                 }
             );
 
-            responseWithMessage(res, StatusCodes.OK, result);
+            responseWithMessage(res, StatusCodes.OK, message);
         } catch (error) {
             next(error);
         }
@@ -85,13 +85,13 @@ class ProductController {
     static restoreProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const result = await ProductService.restoreProductById(
+            const message = await ProductService.restoreProductById(
                 {
                     id: Number(id)
                 }
             );
 
-            responseWithMessage(res, StatusCodes.OK, result);
+            responseWithMessage(res, StatusCodes.OK, message);
         } catch (error) {
             next(error);
         }

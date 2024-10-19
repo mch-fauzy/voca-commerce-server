@@ -3,12 +3,16 @@ import { createServer } from 'http';
 import cors from 'cors';
 
 import { CONFIG } from './configs/config';
-import { initDbConnection, initRedisConnection } from './utils/connection-check';
+import {
+    initDbConnection,
+    initRedisConnection
+} from './utils/connection-check';
 import { logger } from './configs/winston';
 import { errorHandler } from './middlewares/error-handler-middleware';
 import { router } from './routes';
+import { CONSTANTS } from './utils/constants';
 
-const PORT = CONFIG.SERVER.PORT;
+const PORT = CONFIG.SERVER.PORT ?? CONSTANTS.SERVER.DEFAULT_PORT;
 const app = express();
 
 app.use(cors());

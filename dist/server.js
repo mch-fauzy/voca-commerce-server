@@ -25,6 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importStar(require("express"));
 const http_1 = require("http");
@@ -34,7 +35,8 @@ const connection_check_1 = require("./utils/connection-check");
 const winston_1 = require("./configs/winston");
 const error_handler_middleware_1 = require("./middlewares/error-handler-middleware");
 const routes_1 = require("./routes");
-const PORT = config_1.CONFIG.SERVER.PORT;
+const constants_1 = require("./utils/constants");
+const PORT = (_a = config_1.CONFIG.SERVER.PORT) !== null && _a !== void 0 ? _a : constants_1.CONSTANTS.SERVER.DEFAULT_PORT;
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use((0, express_1.json)());

@@ -17,6 +17,7 @@ const constants_1 = require("../utils/constants");
 const product_model_1 = require("../models/product-model");
 const redis_cache_1 = require("../utils/redis-cache");
 const winston_1 = require("../configs/winston");
+const calculate_pagination_1 = require("../utils/calculate-pagination");
 // import { CreateProduct } from '../models/product-model';
 class ProductService {
 }
@@ -43,11 +44,11 @@ ProductService.createProduct = (req) => __awaiter(void 0, void 0, void 0, functi
 });
 ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield product_repository_1.ProductRepository.getProductById(req.id);
-        if (!productData)
+        const product = yield product_repository_1.ProductRepository.getProductById(req.id);
+        if (!product)
             throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
         // Prevent updating if product is marked as deleted, unless it's being restored
-        const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+        const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
             throw custom_error_1.CustomError.forbidden(`Product with id ${req.id} is marked as deleted and cannot be updated.`);
         /*
@@ -84,10 +85,10 @@ ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, fu
 });
 ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield product_repository_1.ProductRepository.getProductById(req.id);
-        if (!productData)
+        const product = yield product_repository_1.ProductRepository.getProductById(req.id);
+        if (!product)
             throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
-        const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+        const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
             throw custom_error_1.CustomError.conflict(`Product with id ${req.id} is already marked as deleted.`);
         yield product_repository_1.ProductRepository.updateProductById(req.id, {
@@ -107,11 +108,11 @@ ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0
 });
 ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield product_repository_1.ProductRepository.getProductById(req.id);
-        if (!productData)
+        const product = yield product_repository_1.ProductRepository.getProductById(req.id);
+        if (!product)
             throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
         // Prevent restore if product not marked as deleted
-        const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+        const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
             throw custom_error_1.CustomError.conflict(`Product with id ${req.id} cannot be restored because it is not marked as deleted`);
         yield product_repository_1.ProductRepository.updateProductById(req.id, {
@@ -131,11 +132,11 @@ ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, f
 });
 ProductService.deleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const productData = yield product_repository_1.ProductRepository.getProductById(req.id);
-        if (!productData)
+        const product = yield product_repository_1.ProductRepository.getProductById(req.id);
+        if (!product)
             throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
         // Additional security to reduce accident caused by deletion
-        const isProductMarkedAsDeleted = Boolean(productData.deletedAt || productData.deletedBy);
+        const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
             throw custom_error_1.CustomError.forbidden(`Product with id ${req.id} is not marked as deleted`);
         yield product_repository_1.ProductRepository.deleteProductById(req.id);
@@ -154,26 +155,27 @@ ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, funct
     try {
         // Get cache
         const productKey = `${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`; // Get unique key based on id
-        const cacheData = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
-        if (cacheData) {
-            return {
-                data: JSON.parse(cacheData), // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
-                metadata: {
-                    isFromCache: true
-                }
-            };
+        const productCache = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
+        if (productCache) {
+            if (productCache) {
+                const productCacheResponse = JSON.parse(productCache); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+                productCacheResponse.metadata.isFromCache = true;
+                return productCacheResponse;
+            }
+            ;
         }
-        const productData = yield product_repository_1.ProductRepository.getProductById(req.id);
-        if (!productData)
+        const product = yield product_repository_1.ProductRepository.getProductById(req.id);
+        if (!product)
             throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
-        yield redis_cache_1.RedisUtils.storeCacheWithExpiry(productKey, constants_1.CONSTANTS.REDIS.CACHE_EXPIRY, JSON.stringify(productData) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
-        );
-        return {
-            data: productData,
+        const response = {
+            data: product,
             metadata: {
                 isFromCache: false
             }
         };
+        yield redis_cache_1.RedisUtils.storeCacheWithExpiry(productKey, constants_1.CONSTANTS.REDIS.CACHE_EXPIRY, JSON.stringify(response) // JSON.stringify to converts a JavaScript value to a JavaScript Object Notation (JSON) string
+        );
+        return response;
     }
     catch (error) {
         if (error instanceof custom_error_1.CustomError)
@@ -185,17 +187,14 @@ ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, funct
 ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const productKey = redis_cache_1.RedisUtils.generateHashedCacheKey(constants_1.CONSTANTS.REDIS.PRODUCT_KEY, req);
-        const cacheData = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
-        if (cacheData) {
-            return {
-                data: JSON.parse(cacheData),
-                metadata: {
-                    isFromCache: true
-                }
-            };
+        const productsCache = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
+        if (productsCache) {
+            const productsCacheResponse = JSON.parse(productsCache);
+            productsCacheResponse.metadata.isFromCache = true;
+            return productsCacheResponse;
         }
         // Can assign sorts and filterFields more than 1
-        const productsData = yield product_repository_1.ProductRepository.getProductsByFilter({
+        const products = yield product_repository_1.ProductRepository.getProductsByFilter({
             selectFields: [
                 product_model_1.PRODUCT_DB_FIELD.id,
                 product_model_1.PRODUCT_DB_FIELD.name,
@@ -228,14 +227,20 @@ ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, 
                 }
             ]
         });
-        yield redis_cache_1.RedisUtils.storeCacheWithExpiry(productKey, constants_1.CONSTANTS.REDIS.CACHE_EXPIRY, JSON.stringify(productsData));
-        yield redis_cache_1.RedisUtils.addCacheToSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
-        return {
-            data: productsData,
+        const pagination = (0, calculate_pagination_1.calculatePaginationMetadata)(products.count, req.page, req.pageSize);
+        const response = {
+            data: products.data,
             metadata: {
+                totalPages: pagination.totalPages,
+                currentPage: pagination.currentPage,
+                nextPage: pagination.nextPage,
+                previousPage: pagination.previousPage,
                 isFromCache: false
             }
         };
+        yield redis_cache_1.RedisUtils.storeCacheWithExpiry(productKey, constants_1.CONSTANTS.REDIS.CACHE_EXPIRY, JSON.stringify(response));
+        yield redis_cache_1.RedisUtils.addCacheToSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY, productKey);
+        return response;
     }
     catch (error) {
         winston_1.logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);

@@ -4,16 +4,21 @@ import { TokenPayload } from '../models/dto/auth-dto';
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from './constants';
 
-const generateToken = (payload: Pick<TokenPayload, 'email' | 'role'>) => {
+const generateToken = (req: Pick<TokenPayload, 'email' | 'role'>, type: string = 'Bearer') => {
+    const expireTime = CONSTANTS.JWT.EXPIRY;
     const token = sign(
         {
-            email: payload.email,
-            role: payload.role
+            email: req.email,
+            role: req.role
         },
-        String(CONFIG.APP.JWT_ACCESS_KEY),
+        CONFIG.APP.JWT_ACCESS_KEY!,
         { expiresIn: CONSTANTS.JWT.EXPIRY });
 
-    return token;
+    return {
+        token: token,
+        tokenType: type,
+        expiresIn: expireTime
+    };
 }
 
 export { generateToken };

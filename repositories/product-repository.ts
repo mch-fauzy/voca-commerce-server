@@ -11,9 +11,9 @@ import { CustomError } from '../utils/custom-error';
 class ProductRepository {
     static createProduct = async (data: CreateProduct) => {
         try {
-            const createdData = await prisma.voca_product.create({ data: data });
+            const createdProduct = await prisma.voca_product.create({ data: data });
 
-            return createdData;
+            return createdProduct;
         } catch (error) {
             logger.error(`[createProduct] Repository error creating product: ${error}`);
             throw CustomError.internalServer('Failed to create product');
@@ -33,12 +33,12 @@ class ProductRepository {
                 )
                 : undefined;
 
-            const productData = await prisma.voca_product.findUnique({
+            const product = await prisma.voca_product.findUnique({
                 where: { id: id },
                 select
             });
 
-            return productData;
+            return product;
         } catch (error) {
             logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
             throw CustomError.internalServer('Failed to retrieve product by id');
@@ -83,15 +83,23 @@ class ProductRepository {
                 })
                 : undefined;
 
-            const productsData = await prisma.voca_product.findMany({
-                select,
-                where,
-                skip,
-                take,
-                orderBy
-            });
+            const [products, totalProducts] = await prisma.$transaction([
+                prisma.voca_product.findMany({
+                    select,
+                    where,
+                    skip,
+                    take,
+                    orderBy
+                }),
+                prisma.voca_product.count({
+                    where
+                })
+            ]);
 
-            return productsData;
+            return {
+                data: products,
+                count: totalProducts
+            };
         } catch (error) {
             logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve products by filter');
@@ -100,12 +108,12 @@ class ProductRepository {
 
     static isProductExistById = async (id: number) => {
         try {
-            const productData = await prisma.voca_product.findUnique({
+            const product = await prisma.voca_product.findUnique({
                 where: { id: id },
                 select: { id: true }
             });
 
-            return productData ? true : false;
+            return product ? true : false;
         } catch (error) {
             logger.error('[isProductExistById] Repository error checking product by id');
             throw CustomError.internalServer('Failed to check product by id');
@@ -114,12 +122,12 @@ class ProductRepository {
 
     static updateProductById = async (id: number, data: UpdateProduct | SoftDeleteProduct) => {
         try {
-            const updatedData = await prisma.voca_product.update({
+            const updatedProduct = await prisma.voca_product.update({
                 where: { id: id },
                 data: data
             });
 
-            return updatedData;
+            return updatedProduct;
         } catch (error) {
             logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
             throw CustomError.internalServer('Failed to update product by id');
@@ -128,9 +136,9 @@ class ProductRepository {
 
     static deleteProductById = async (id: number) => {
         try {
-            const deletedData = await prisma.voca_product.delete({ where: { id: id } });
+            const deletedProduct = await prisma.voca_product.delete({ where: { id: id } });
 
-            return deletedData;
+            return deletedProduct;
         } catch (error) {
             logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
             throw CustomError.internalServer('Failed to delete product by id');

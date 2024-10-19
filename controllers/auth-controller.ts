@@ -17,13 +17,13 @@ class AuthController {
     static registerUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body = await AuthValidator.validateRegisterBody(req.body);
-            const result = await AuthService.register({
+            const message = await AuthService.register({
                 email: body.email,
                 password: body.password,
                 role: CONSTANTS.ROLES.USER,
             });
 
-            responseWithMessage(res, StatusCodes.CREATED, result);
+            responseWithMessage(res, StatusCodes.CREATED, message);
         } catch (error) {
             // Pass the error to the error handler
             next(error);
@@ -33,13 +33,13 @@ class AuthController {
     static registerAdmin = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body = await AuthValidator.validateRegisterBody(req.body);
-            const result = await AuthService.register({
+            const message = await AuthService.register({
                 email: body.email,
                 password: body.password,
                 role: CONSTANTS.ROLES.ADMIN,
             });
 
-            responseWithMessage(res, StatusCodes.CREATED, result);
+            responseWithMessage(res, StatusCodes.CREATED, message);
         } catch (error) {
             next(error);
         }
