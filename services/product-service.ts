@@ -34,7 +34,7 @@ class ProductService {
             return 'Success';
         } catch (error) {
             logger.error(`[createProduct] Service error creating product: ${error}`);
-            throw CustomError.internalServer('Service failed to create product');
+            throw CustomError.internalServer('Failed to create product');
         }
     }
 
@@ -80,7 +80,7 @@ class ProductService {
             if (error instanceof CustomError) throw error;
 
             logger.error(`[updateProductById] Service error updating product by id: ${error}`);
-            throw CustomError.internalServer('Service failed to update product by id');
+            throw CustomError.internalServer('Failed to update product by id');
         }
     }
 
@@ -107,7 +107,7 @@ class ProductService {
             if (error instanceof CustomError) throw error;
 
             logger.error(`[softDeleteProductById] Service error soft deleting product by id: ${error}`);
-            throw CustomError.internalServer('Service failed to soft delete product by id');
+            throw CustomError.internalServer('Failed to soft delete product by id');
         }
     }
 
@@ -135,7 +135,7 @@ class ProductService {
             if (error instanceof CustomError) throw error;
 
             logger.error(`[restoreProductById] Service error restoring product by id: ${error}`);
-            throw CustomError.internalServer('Service failed to restore product by id');
+            throw CustomError.internalServer('Failed to restore product by id');
         }
     }
 
@@ -158,7 +158,7 @@ class ProductService {
             if (error instanceof CustomError) throw error;
 
             logger.error(`[deleteProductById] Service error deleting product by id: ${error}`);
-            throw CustomError.internalServer('Service failed to delete product by id');
+            throw CustomError.internalServer('Failed to delete product by id');
         }
     }
 
@@ -195,7 +195,7 @@ class ProductService {
             if (error instanceof CustomError) throw error;
 
             logger.error(`[getProductById] Service error retrieving product by id: ${error}`);
-            throw CustomError.internalServer('Service failed to retrieve product by id');
+            throw CustomError.internalServer('Failed to retrieve product by id');
         }
     }
 
@@ -262,7 +262,7 @@ class ProductService {
             };
         } catch (error) {
             logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);
-            throw CustomError.internalServer('Service failed to retrieve products by filter');
+            throw CustomError.internalServer('Failed to retrieve products by filter');
         }
     }
 }

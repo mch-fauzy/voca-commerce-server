@@ -15,7 +15,7 @@ class ProductRepository {
 
             return createdData;
         } catch (error) {
-            logger.error(`[createProduct] Error creating product: ${error}`);
+            logger.error(`[createProduct] Repository error creating product: ${error}`);
             throw CustomError.internalServer('Failed to create product');
         }
     }
@@ -26,7 +26,7 @@ class ProductRepository {
 
             return productData;
         } catch (error) {
-            logger.error(`[getProductById] Error retrieving product by id: ${error}`);
+            logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
             throw CustomError.internalServer('Failed to retrieve product by id');
         }
     }
@@ -79,7 +79,7 @@ class ProductRepository {
 
             return productsData;
         } catch (error) {
-            logger.error(`[getProductsByFilter] Error retrieving products by filter: ${error}`);
+            logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve products by filter');
         }
     }
@@ -93,7 +93,7 @@ class ProductRepository {
 
             return productData ? true : false;
         } catch (error) {
-            logger.error('[isProductExistById] Error checking product by id');
+            logger.error('[isProductExistById] Repository error checking product by id');
             throw CustomError.internalServer('Failed to check product by id');
         }
     }
@@ -107,7 +107,7 @@ class ProductRepository {
 
             return updatedData;
         } catch (error) {
-            logger.error(`[updateProductById] Error updating product by id: ${error}`);
+            logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
             throw CustomError.internalServer('Failed to update product by id');
         }
     }
@@ -118,7 +118,7 @@ class ProductRepository {
 
             return deletedData;
         } catch (error) {
-            logger.error(`[deleteProductById] Error deleting product by id: ${error}`);
+            logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
             throw CustomError.internalServer('Failed to delete product by id');
         }
     }
