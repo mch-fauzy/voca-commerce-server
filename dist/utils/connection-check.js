@@ -20,7 +20,7 @@ const initDbConnection = () => __awaiter(void 0, void 0, void 0, function* () {
         winston_1.logger.info('Connected to database');
     }
     catch (error) {
-        winston_1.logger.error(`[initDbConnection] Error connecting to the database: ${error}`);
+        winston_1.logger.error(`[initDbConnection] Utility error connecting to the database: ${error}`);
         process.exit(1); // Exit the application if the database connection fails
     }
 });

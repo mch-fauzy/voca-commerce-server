@@ -1,20 +1,29 @@
-import { Request, Response, NextFunction } from 'express';
+import {
+    Request,
+    Response,
+    NextFunction
+} from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { AuthService } from '../services/auth-service';
-import { LoginRequest, loginValidate, RegisterRequest, registerValidate } from '../models/dto/auth-dto';
+import { AuthValidator } from '../models/dto/auth-dto';
 import { CONSTANTS } from '../utils/constants';
+import {
+    responseWithData,
+    responseWithMessage
+} from '../utils/http-response';
 
 class AuthController {
     static registerUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const body: RegisterRequest = await registerValidate.validateAsync(req.body);
+            const body = await AuthValidator.validateRegisterBody(req.body);
             const result = await AuthService.register({
-                ...body,
+                email: body.email,
+                password: body.password,
                 role: CONSTANTS.ROLES.USER,
             });
 
-            res.status(StatusCodes.CREATED).json(result);
+            responseWithMessage(res, StatusCodes.CREATED, result);
         } catch (error) {
             // Pass the error to the error handler
             next(error);
@@ -23,13 +32,14 @@ class AuthController {
 
     static registerAdmin = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const body: RegisterRequest = await registerValidate.validateAsync(req.body);
+            const body = await AuthValidator.validateRegisterBody(req.body);
             const result = await AuthService.register({
-                ...body,
+                email: body.email,
+                password: body.password,
                 role: CONSTANTS.ROLES.ADMIN,
             });
 
-            res.status(StatusCodes.CREATED).json(result);
+            responseWithMessage(res, StatusCodes.CREATED, result);
         } catch (error) {
             next(error);
         }
@@ -37,10 +47,13 @@ class AuthController {
 
     static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const body: LoginRequest = await loginValidate.validateAsync(req.body);
-            const result = await AuthService.login(body);
+            const body = await AuthValidator.validateLoginBody(req.body);
+            const result = await AuthService.login({
+                email: body.email,
+                password: body.password
+            });
 
-            res.status(StatusCodes.OK).json(result);
+            responseWithData(res, StatusCodes.OK, result);
         } catch (error) {
             next(error);
         }

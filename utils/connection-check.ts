@@ -8,7 +8,7 @@ const initDbConnection = async () => {
         await prisma.$queryRaw`SELECT 1`;
         logger.info('Connected to database');
     } catch (error) {
-        logger.error(`[initDbConnection] Error connecting to the database: ${error}`);
+        logger.error(`[initDbConnection] Utility error connecting to the database: ${error}`);
         process.exit(1); // Exit the application if the database connection fails
     }
 };

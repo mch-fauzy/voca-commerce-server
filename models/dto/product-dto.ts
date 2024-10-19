@@ -38,7 +38,7 @@ interface GetProductsByFilterRequest {
 
 class ProductValidator {
     // Create product section
-    private static createProductBodyValidate = Joi.object({
+    private static createProductBodyValidator = Joi.object({
         name: Joi.string().required(),
         description: Joi.string().optional().allow(null),
         price: Joi.number().min(0).required(),
@@ -46,11 +46,11 @@ class ProductValidator {
     })
 
     static validateCreateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
-        return await this.createProductBodyValidate.validateAsync(body);
+        return await this.createProductBodyValidator.validateAsync(body);
     }
 
     // Update product section
-    private static updateProductBodyValidate = Joi.object({
+    private static updateProductBodyValidator = Joi.object({
         name: Joi.string().optional(),
         description: Joi.string().optional().allow(null),
         price: Joi.number().min(0).optional(),
@@ -58,10 +58,10 @@ class ProductValidator {
     }).or('name', 'description', 'price', 'available') // At least one field must be present
 
     static validateUpdateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
-        return await this.updateProductBodyValidate.validateAsync(body);
+        return await this.updateProductBodyValidator.validateAsync(body);
     }
 
-    private static getProductsByFilterQueryValidate = Joi.object({
+    private static getProductsByFilterQueryValidator = Joi.object({
         page: Joi.number().min(1).optional(),
         pageSize: Joi.number().min(1).optional(),
         name: Joi.string().optional(),
@@ -70,7 +70,7 @@ class ProductValidator {
     })
 
     static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
-        return await this.getProductsByFilterQueryValidate.validateAsync(query);
+        return await this.getProductsByFilterQueryValidator.validateAsync(query);
     }
 }
 

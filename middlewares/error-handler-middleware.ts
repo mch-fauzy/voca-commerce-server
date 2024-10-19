@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { CustomError } from '../utils/custom-error';
 import { responseWithMessage } from '../utils/http-response';
+import { logger } from '../configs/winston';
 
 // NextFunction must be included to make error handler middleware to work properly
 const errorHandler = (error: CustomError | Error, req: Request, res: Response, next: NextFunction) => {
@@ -19,8 +20,9 @@ const errorHandler = (error: CustomError | Error, req: Request, res: Response, n
     }
 
     // Handle unexpected errors
+    logger.error(`[errorHandler] Middleware unexpected error: ${error}`);
     responseWithMessage(res, StatusCodes.INTERNAL_SERVER_ERROR, 'Internal server error');
-
+    next();
 };
 
 export { errorHandler };

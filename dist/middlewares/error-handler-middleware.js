@@ -4,6 +4,7 @@ exports.errorHandler = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const custom_error_1 = require("../utils/custom-error");
 const http_response_1 = require("../utils/http-response");
+const winston_1 = require("../configs/winston");
 // NextFunction must be included to make error handler middleware to work properly
 const errorHandler = (error, req, res, next) => {
     // Handle custom errors
@@ -17,6 +18,8 @@ const errorHandler = (error, req, res, next) => {
         return;
     }
     // Handle unexpected errors
+    winston_1.logger.error(`[errorHandler] Middleware unexpected error: ${error}`);
     (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR, 'Internal server error');
+    next();
 };
 exports.errorHandler = errorHandler;

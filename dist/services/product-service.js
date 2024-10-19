@@ -38,7 +38,7 @@ ProductService.createProduct = (req) => __awaiter(void 0, void 0, void 0, functi
     }
     catch (error) {
         winston_1.logger.error(`[createProduct] Service error creating product: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to create product');
+        throw custom_error_1.CustomError.internalServer('Failed to create product');
     }
 });
 ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -79,7 +79,7 @@ ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, fu
         if (error instanceof custom_error_1.CustomError)
             throw error;
         winston_1.logger.error(`[updateProductById] Service error updating product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to update product by id');
+        throw custom_error_1.CustomError.internalServer('Failed to update product by id');
     }
 });
 ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -102,7 +102,7 @@ ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0
         if (error instanceof custom_error_1.CustomError)
             throw error;
         winston_1.logger.error(`[softDeleteProductById] Service error soft deleting product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to soft delete product by id');
+        throw custom_error_1.CustomError.internalServer('Failed to soft delete product by id');
     }
 });
 ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -126,7 +126,7 @@ ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, f
         if (error instanceof custom_error_1.CustomError)
             throw error;
         winston_1.logger.error(`[restoreProductById] Service error restoring product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to restore product by id');
+        throw custom_error_1.CustomError.internalServer('Failed to restore product by id');
     }
 });
 ProductService.deleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -147,7 +147,7 @@ ProductService.deleteProductById = (req) => __awaiter(void 0, void 0, void 0, fu
         if (error instanceof custom_error_1.CustomError)
             throw error;
         winston_1.logger.error(`[deleteProductById] Service error deleting product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to delete product by id');
+        throw custom_error_1.CustomError.internalServer('Failed to delete product by id');
     }
 });
 ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -179,7 +179,7 @@ ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, funct
         if (error instanceof custom_error_1.CustomError)
             throw error;
         winston_1.logger.error(`[getProductById] Service error retrieving product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to retrieve product by id');
+        throw custom_error_1.CustomError.internalServer('Failed to retrieve product by id');
     }
 });
 ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -239,6 +239,6 @@ ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, 
     }
     catch (error) {
         winston_1.logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Service failed to retrieve products by filter');
+        throw custom_error_1.CustomError.internalServer('Failed to retrieve products by filter');
     }
 });

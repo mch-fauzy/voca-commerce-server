@@ -1,52 +1,57 @@
 import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
+import { Filter } from '../models/filter';
 import { CreateUser } from '../models/user-model';
 import { CustomError } from '../utils/custom-error';
 
 class UserRepository {
-    static async createUser(userData: CreateUser) {
+    static createUser = async (data: CreateUser) => {
         try {
-            const result = await prisma.voca_user.create({ data: userData });
+            const userData = await prisma.voca_user.create({ data: data });
 
-            return result;
+            return userData;
         } catch (error) {
-            logger.error(`[createUser] Error creating user: ${error}`);
+            logger.error(`[createUser] Repository error creating user: ${error}`);
             throw CustomError.internalServer('Failed to create user');
         }
     };
 
     // If not passing a complex object with multiple fields, there is no need for an interface
-    static async getUserCredentialsByEmail(email: string) {
+    static getUserByEmail = async (email: string, fields?: Pick<Filter, 'selectFields'>) => {
         try {
-            const result = await prisma.voca_user.findUnique({
-                where: { email: email },
-                select: {
-                    email: true,
-                    password: true,
-                    role: true
-                }
-            });
-            if (!result) {
-                throw CustomError.notFound('User not found');
-            }
+            const { selectFields } = fields ?? {};
 
-            return result;
+            // Handle select specific field
+            const select = selectFields
+                ? Object.fromEntries(
+                    selectFields.map((field) => {
+                        return [field, true];
+                    })
+                )
+                : undefined;
+
+            const userData = await prisma.voca_user.findUnique({
+                where: { email: email },
+                select
+            });
+
+            return userData;
         } catch (error) {
-            logger.error(`[getUserCredentialsByEmail] Error retrieving user credentials by email: ${error}`)
-            throw CustomError.internalServer('Failed to retrieve user credentials by email');
+            logger.error(`[getUserCredentialsByEmail] Repository error retrieving user by email: ${error}`)
+            throw CustomError.internalServer('Failed to retrieve user by email');
         }
     };
 
-    static async isUserExistsByEmail(email: string) {
+    static isUserExistByEmail = async (email: string) => {
         try {
-            const result = await prisma.voca_user.findUnique({
+            const userData = await prisma.voca_user.findUnique({
                 where: { email: email },
-                select: { id: true }
+                select: { email: true }
             });
 
-            return result ? true : false;
+            return userData ? true : false;
         } catch (error) {
-            logger.error(`[isUserExistsByEmail] Error checking user by email: ${error}`)
+            logger.error(`[isUserExistByEmail] Repository error checking user by email: ${error}`)
             throw CustomError.internalServer('Failed to check user by email');
         }
     }
