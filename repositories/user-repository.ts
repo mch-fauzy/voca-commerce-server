@@ -7,9 +7,9 @@ import { CustomError } from '../utils/custom-error';
 class UserRepository {
     static createUser = async (data: CreateUser) => {
         try {
-            const userData = await prisma.voca_user.create({ data: data });
+            const createdUser = await prisma.voca_user.create({ data: data });
 
-            return userData;
+            return createdUser;
         } catch (error) {
             logger.error(`[createUser] Repository error creating user: ${error}`);
             throw CustomError.internalServer('Failed to create user');
@@ -30,12 +30,12 @@ class UserRepository {
                 )
                 : undefined;
 
-            const userData = await prisma.voca_user.findUnique({
+            const user = await prisma.voca_user.findUnique({
                 where: { email: email },
                 select
             });
 
-            return userData;
+            return user;
         } catch (error) {
             logger.error(`[getUserCredentialsByEmail] Repository error retrieving user by email: ${error}`)
             throw CustomError.internalServer('Failed to retrieve user by email');
@@ -44,12 +44,12 @@ class UserRepository {
 
     static isUserExistByEmail = async (email: string) => {
         try {
-            const userData = await prisma.voca_user.findUnique({
+            const user = await prisma.voca_user.findUnique({
                 where: { email: email },
                 select: { email: true }
             });
 
-            return userData ? true : false;
+            return user ? true : false;
         } catch (error) {
             logger.error(`[isUserExistByEmail] Repository error checking user by email: ${error}`)
             throw CustomError.internalServer('Failed to check user by email');
