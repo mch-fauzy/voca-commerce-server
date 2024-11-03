@@ -24,8 +24,19 @@ exports.AuthService = AuthService;
 _a = AuthService;
 AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isUserExist = yield user_repository_1.UserRepository.isUserExistByEmail(req.email);
-        if (isUserExist)
+        const users = yield user_repository_1.UserRepository.getUsersByFilter({
+            selectFields: [
+                user_model_1.USER_DB_FIELD.email
+            ],
+            filterFields: [
+                {
+                    field: user_model_1.USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }
+            ]
+        });
+        if (users.count !== 0)
             throw custom_error_1.CustomError.conflict('Account with this email already exists');
         const userId = (0, uuid_1.v4)();
         const hashedPassword = yield (0, password_1.hashPassword)(req.password);
@@ -48,15 +59,23 @@ AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
 });
 AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield user_repository_1.UserRepository.getUserByEmail(req.email, {
+        const users = yield user_repository_1.UserRepository.getUsersByFilter({
             selectFields: [
                 user_model_1.USER_DB_FIELD.email,
                 user_model_1.USER_DB_FIELD.password,
                 user_model_1.USER_DB_FIELD.role
+            ],
+            filterFields: [
+                {
+                    field: user_model_1.USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }
             ]
         });
-        if (!user)
+        if (users.count === 0)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
+        const user = users.data[0];
         const isValidPassword = yield (0, password_1.comparePassword)(req.password, user.password);
         if (!isValidPassword)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');

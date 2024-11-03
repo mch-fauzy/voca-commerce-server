@@ -28,6 +28,29 @@ ProductRepository.createProduct = (data) => __awaiter(void 0, void 0, void 0, fu
         throw custom_error_1.CustomError.internalServer('Failed to create product');
     }
 });
+ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const updatedProduct = yield prisma_client_1.prisma.voca_product.update({
+            where: { id: id },
+            data: data
+        });
+        return updatedProduct;
+    }
+    catch (error) {
+        winston_1.logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to update product by id');
+    }
+});
+ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const deletedProduct = yield prisma_client_1.prisma.voca_product.delete({ where: { id: id } });
+        return deletedProduct;
+    }
+    catch (error) {
+        winston_1.logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to delete product by id');
+    }
+});
 ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
@@ -64,8 +87,8 @@ ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, vo
             }))
             : undefined;
         // Handle pagination
-        const skip = (pagination.page - 1) * pagination.pageSize;
-        const take = pagination.pageSize;
+        const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
+        const take = pagination ? pagination.pageSize : undefined;
         // Handle sort (output: list of object)
         const orderBy = sorts
             ? sorts.map(({ field, order }) => {
@@ -109,28 +132,5 @@ ProductRepository.isProductExistById = (id) => __awaiter(void 0, void 0, void 0,
     catch (error) {
         winston_1.logger.error('[isProductExistById] Repository error checking product by id');
         throw custom_error_1.CustomError.internalServer('Failed to check product by id');
-    }
-});
-ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const updatedProduct = yield prisma_client_1.prisma.voca_product.update({
-            where: { id: id },
-            data: data
-        });
-        return updatedProduct;
-    }
-    catch (error) {
-        winston_1.logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to update product by id');
-    }
-});
-ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const deletedProduct = yield prisma_client_1.prisma.voca_product.delete({ where: { id: id } });
-        return deletedProduct;
-    }
-    catch (error) {
-        winston_1.logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to delete product by id');
     }
 });

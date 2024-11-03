@@ -20,6 +20,31 @@ class ProductRepository {
         }
     }
 
+    static updateProductById = async (id: number, data: UpdateProduct | SoftDeleteProduct) => {
+        try {
+            const updatedProduct = await prisma.voca_product.update({
+                where: { id: id },
+                data: data
+            });
+
+            return updatedProduct;
+        } catch (error) {
+            logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
+            throw CustomError.internalServer('Failed to update product by id');
+        }
+    }
+
+    static deleteProductById = async (id: number) => {
+        try {
+            const deletedProduct = await prisma.voca_product.delete({ where: { id: id } });
+
+            return deletedProduct;
+        } catch (error) {
+            logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
+            throw CustomError.internalServer('Failed to delete product by id');
+        }
+    }
+
     static getProductById = async (id: number, fields?: Pick<Filter, 'selectFields'>) => {
         try {
             const { selectFields } = fields ?? {};
@@ -69,8 +94,8 @@ class ProductRepository {
                 : undefined;
 
             // Handle pagination
-            const skip = (pagination.page - 1) * pagination.pageSize;
-            const take = pagination.pageSize;
+            const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
+            const take = pagination ? pagination.pageSize : undefined;
 
             // Handle sort (output: list of object)
             const orderBy = sorts
@@ -117,31 +142,6 @@ class ProductRepository {
         } catch (error) {
             logger.error('[isProductExistById] Repository error checking product by id');
             throw CustomError.internalServer('Failed to check product by id');
-        }
-    }
-
-    static updateProductById = async (id: number, data: UpdateProduct | SoftDeleteProduct) => {
-        try {
-            const updatedProduct = await prisma.voca_product.update({
-                where: { id: id },
-                data: data
-            });
-
-            return updatedProduct;
-        } catch (error) {
-            logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
-            throw CustomError.internalServer('Failed to update product by id');
-        }
-    }
-
-    static deleteProductById = async (id: number) => {
-        try {
-            const deletedProduct = await prisma.voca_product.delete({ where: { id: id } });
-
-            return deletedProduct;
-        } catch (error) {
-            logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
-            throw CustomError.internalServer('Failed to delete product by id');
         }
     }
 }

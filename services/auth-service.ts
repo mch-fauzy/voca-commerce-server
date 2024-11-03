@@ -18,8 +18,19 @@ import { USER_DB_FIELD } from '../models/user-model';
 class AuthService {
     static register = async (req: RegisterRequest) => {
         try {
-            const isUserExist = await UserRepository.isUserExistByEmail(req.email)
-            if (isUserExist) throw CustomError.conflict('Account with this email already exists');
+            const users = await UserRepository.getUsersByFilter({
+                selectFields: [
+                    USER_DB_FIELD.email
+                ],
+                filterFields: [
+                    {
+                        field: USER_DB_FIELD.email,
+                        operator: 'equals',
+                        value: req.email
+                    }
+                ]
+            })
+            if (users.count !== 0) throw CustomError.conflict('Account with this email already exists');
 
             const userId = uuidv4();
             const hashedPassword = await hashPassword(req.password);
@@ -43,15 +54,23 @@ class AuthService {
 
     static login = async (req: LoginRequest) => {
         try {
-            const user = await UserRepository.getUserByEmail(req.email, {
+            const users = await UserRepository.getUsersByFilter({
                 selectFields: [
                     USER_DB_FIELD.email,
                     USER_DB_FIELD.password,
                     USER_DB_FIELD.role
+                ],
+                filterFields: [
+                    {
+                        field: USER_DB_FIELD.email,
+                        operator: 'equals',
+                        value: req.email
+                    }
                 ]
             });
-            if (!user) throw CustomError.unauthorized('Invalid credentials');
+            if (users.count === 0) throw CustomError.unauthorized('Invalid credentials');
 
+            const user = users.data[0]
             const isValidPassword = await comparePassword(req.password, user.password);
             if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
 

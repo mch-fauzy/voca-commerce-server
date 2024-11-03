@@ -20,45 +20,61 @@ exports.UserRepository = UserRepository;
 _a = UserRepository;
 UserRepository.createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userData = yield prisma_client_1.prisma.voca_user.create({ data: data });
-        return userData;
+        const createdUser = yield prisma_client_1.prisma.voca_user.create({ data: data });
+        return createdUser;
     }
     catch (error) {
         winston_1.logger.error(`[createUser] Repository error creating user: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to create user');
     }
 });
-// If not passing a complex object with multiple fields, there is no need for an interface
-UserRepository.getUserByEmail = (email, fields) => __awaiter(void 0, void 0, void 0, function* () {
+UserRepository.getUsersByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
+        const { selectFields, filterFields, pagination, sorts } = filter;
         // Handle select specific field
         const select = selectFields
             ? Object.fromEntries(selectFields.map((field) => {
                 return [field, true];
             }))
             : undefined;
-        const userData = yield prisma_client_1.prisma.voca_user.findUnique({
-            where: { email: email },
-            select
-        });
-        return userData;
+        // Handle filter field (output: create a single object from list)
+        const where = filterFields
+            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => {
+                return [field, { [operator]: value }];
+            }))
+            : undefined;
+        // Handle pagination
+        const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
+        const take = pagination ? pagination.pageSize : undefined;
+        // Handle sort (output: list of object)
+        const orderBy = sorts
+            ? sorts.map(({ field, order }) => {
+                if (!field)
+                    return {};
+                return {
+                    [field]: order
+                };
+            })
+            : undefined;
+        const [users, totalUsers] = yield prisma_client_1.prisma.$transaction([
+            prisma_client_1.prisma.voca_user.findMany({
+                select,
+                where,
+                skip,
+                take,
+                orderBy
+            }),
+            prisma_client_1.prisma.voca_user.count({
+                where
+            })
+        ]);
+        return {
+            data: users,
+            count: totalUsers
+        };
     }
     catch (error) {
-        winston_1.logger.error(`[getUserCredentialsByEmail] Repository error retrieving user by email: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to retrieve user by email');
-    }
-});
-UserRepository.isUserExistByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userData = yield prisma_client_1.prisma.voca_user.findUnique({
-            where: { email: email },
-            select: { email: true }
-        });
-        return userData ? true : false;
-    }
-    catch (error) {
-        winston_1.logger.error(`[isUserExistByEmail] Repository error checking user by email: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to check user by email');
+        winston_1.logger.error(`[getUsersByFilter] Repository error retrieving users by filter: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to retrieve users by filter');
     }
 });
