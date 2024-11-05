@@ -56,9 +56,7 @@ ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, voi
         const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
         // Handle select specific field
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => {
-                return [field, true];
-            }))
+            ? Object.fromEntries(selectFields.map((field) => [field, true]))
             : undefined;
         const product = yield prisma_client_1.prisma.voca_product.findUnique({
             where: { id: id },
@@ -76,29 +74,17 @@ ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, vo
         const { selectFields, filterFields, pagination, sorts } = filter;
         // Handle select specific field
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => {
-                return [field, true];
-            }))
+            ? Object.fromEntries(selectFields.map((field) => [field, true]))
             : undefined;
-        // Handle filter field (output: create a single object from list)
+        // Handle filter field (output: create a single object from array)
         const where = filterFields
-            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => {
-                return [field, { [operator]: value }];
-            }))
+            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]))
             : undefined;
         // Handle pagination
         const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
         const take = pagination ? pagination.pageSize : undefined;
-        // Handle sort (output: list of object)
-        const orderBy = sorts
-            ? sorts.map(({ field, order }) => {
-                if (!field)
-                    return {};
-                return {
-                    [field]: order
-                };
-            })
-            : undefined;
+        // Handle sort (output: array of object)
+        const orderBy = sorts === null || sorts === void 0 ? void 0 : sorts.filter(sort => sort.field).map(({ field, order }) => ({ [field]: order }));
         const [products, totalProducts] = yield prisma_client_1.prisma.$transaction([
             prisma_client_1.prisma.voca_product.findMany({
                 select,

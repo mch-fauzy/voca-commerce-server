@@ -52,9 +52,7 @@ class ProductRepository {
             // Handle select specific field
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => {
-                        return [field, true];
-                    })
+                    selectFields.map((field) => [field, true])
                 )
                 : undefined;
 
@@ -77,19 +75,14 @@ class ProductRepository {
             // Handle select specific field
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => {
-                        return [field, true];
-                    })
+                    selectFields.map((field) => [field, true])
                 )
                 : undefined;
 
-
-            // Handle filter field (output: create a single object from list)
+            // Handle filter field (output: create a single object from array)
             const where = filterFields
                 ? Object.fromEntries(
-                    filterFields.map(({ field, operator, value }) => {
-                        return [field, { [operator]: value }];
-                    })
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }])
                 )
                 : undefined;
 
@@ -97,16 +90,9 @@ class ProductRepository {
             const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
             const take = pagination ? pagination.pageSize : undefined;
 
-            // Handle sort (output: list of object)
-            const orderBy = sorts
-                ? sorts.map(({ field, order }) => {
-                    if (!field) return {};
-
-                    return {
-                        [field]: order
-                    };
-                })
-                : undefined;
+            // Handle sort (output: array of object)
+            const orderBy = sorts?.filter(sort => sort.field) // filter out undefined or empty fields
+                .map(({ field, order }) => ({ [field]: order }))
 
             const [products, totalProducts] = await prisma.$transaction([
                 prisma.voca_product.findMany({
