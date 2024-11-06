@@ -1,9 +1,9 @@
 import { ProductRepository } from '../repositories/product-repository';
 import {
     CreateProductRequest,
-    UpdateProductRequest,
-    DeleteProductRequest,
-    SoftDeleteProductRequest,
+    UpdateProductByIdRequest,
+    DeleteProductByIdRequest,
+    SoftDeleteProductByIdRequest,
     GetProductByIdRequest,
     GetProductsByFilterRequest,
     GetProductsByFilterResponse,
@@ -41,7 +41,7 @@ class ProductService {
         }
     }
 
-    static updateProductById = async (req: UpdateProductRequest) => {
+    static updateProductById = async (req: UpdateProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
             if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
@@ -87,7 +87,7 @@ class ProductService {
         }
     }
 
-    static softDeleteProductById = async (req: SoftDeleteProductRequest) => {
+    static softDeleteProductById = async (req: SoftDeleteProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
             if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
@@ -114,7 +114,7 @@ class ProductService {
         }
     }
 
-    static restoreProductById = async (req: Pick<SoftDeleteProductRequest, 'id'>) => {
+    static restoreProductById = async (req: Pick<SoftDeleteProductByIdRequest, 'id'>) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
             if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
@@ -142,7 +142,7 @@ class ProductService {
         }
     }
 
-    static deleteProductById = async (req: DeleteProductRequest) => {
+    static deleteProductById = async (req: DeleteProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
             if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);

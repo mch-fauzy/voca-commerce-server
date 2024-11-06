@@ -13,16 +13,16 @@ interface CreateProductRequest extends ProductRequestBody {
     email: string;
 }
 
-interface UpdateProductRequest extends ProductRequestBody {
+interface UpdateProductByIdRequest extends ProductRequestBody {
     id: number;
     email: string;
 }
 
-interface DeleteProductRequest {
+interface DeleteProductByIdRequest {
     id: number;
 }
 
-interface SoftDeleteProductRequest extends DeleteProductRequest {
+interface SoftDeleteProductByIdRequest extends DeleteProductByIdRequest {
     email: string;
 }
 
@@ -88,9 +88,9 @@ class ProductValidator {
 
 export {
     CreateProductRequest,
-    UpdateProductRequest,
-    DeleteProductRequest,
-    SoftDeleteProductRequest,
+    UpdateProductByIdRequest,
+    DeleteProductByIdRequest,
+    SoftDeleteProductByIdRequest,
     GetProductByIdRequest,
     GetProductsByFilterRequest,
     GetProductByIdResponse,
