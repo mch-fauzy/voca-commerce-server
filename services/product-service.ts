@@ -42,11 +42,11 @@ class ProductService {
     static updateProductById = async (req: UpdateProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
-            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            if (!product) throw CustomError.notFound('Product not found');
 
             // Prevent updating if product is marked as deleted, unless it's being restored
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
-            if (isProductMarkedAsDeleted) throw CustomError.forbidden(`Product with id ${req.id} is marked as deleted and cannot be updated.`);
+            if (isProductMarkedAsDeleted) throw CustomError.forbidden('Product marked as deleted and cannot be updated');
 
             /*
             // Below will not trigger type error because Excess Property Checks not triggered when CreateProduct object assigned to a variable
@@ -86,10 +86,10 @@ class ProductService {
     static softDeleteProductById = async (req: SoftDeleteProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
-            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            if (!product) throw CustomError.notFound('Product not found');
 
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
-            if (isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} is already marked as deleted.`);
+            if (isProductMarkedAsDeleted) throw CustomError.conflict('Product already marked as deleted');
 
             await ProductRepository.updateProductById(req.id, {
                 deletedAt: new Date(),
@@ -111,11 +111,11 @@ class ProductService {
     static restoreProductById = async (req: Pick<SoftDeleteProductByIdRequest, 'id'>) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
-            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            if (!product) throw CustomError.notFound('Product not found');
 
             // Prevent restore if product not marked as deleted
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
-            if (!isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} cannot be restored because it is not marked as deleted`);
+            if (!isProductMarkedAsDeleted) throw CustomError.conflict('Product not marked as deleted and cannot be restored');
 
             await ProductRepository.updateProductById(req.id, {
                 deletedAt: null,
@@ -137,11 +137,11 @@ class ProductService {
     static deleteProductById = async (req: DeleteProductByIdRequest) => {
         try {
             const product = await ProductRepository.getProductById(req.id);
-            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            if (!product) throw CustomError.notFound('Product not found');
 
             // Additional security to reduce accident caused by deletion
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
-            if (!isProductMarkedAsDeleted) throw CustomError.forbidden(`Product with id ${req.id} is not marked as deleted`);
+            if (!isProductMarkedAsDeleted) throw CustomError.forbidden('Product not marked as deleted');
 
             await ProductRepository.deleteProductById(req.id);
 
@@ -171,7 +171,7 @@ class ProductService {
             }
 
             const product = await ProductRepository.getProductById(req.id);
-            if (!product) throw CustomError.notFound(`Product with id ${req.id} is not found`);
+            if (!product) throw CustomError.notFound('Product not found');
 
             const response: GetProductByIdResponse = {
                 data: product,

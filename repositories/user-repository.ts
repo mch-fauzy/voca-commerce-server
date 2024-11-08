@@ -64,6 +64,20 @@ class UserRepository {
             throw CustomError.internalServer('Failed to retrieve users by filter');
         }
     };
+
+    static isUserExistById = async (id: string) => {
+        try {
+            const user = await prisma.voca_user.findUnique({
+                where: { id },
+                select: { id: true }
+            });
+
+            return user ? true : false;
+        } catch (error) {
+            logger.error('[isUserExistById] Repository error checking user by id');
+            throw CustomError.internalServer('Failed to check user by id');
+        }
+    };
 }
 
 export { UserRepository };

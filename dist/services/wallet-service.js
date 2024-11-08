@@ -13,14 +13,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletService = void 0;
 const winston_1 = require("../configs/winston");
 const wallet_model_1 = require("../models/wallet-model");
+const user_repository_1 = require("../repositories/user-repository");
 const wallet_repository_1 = require("../repositories/wallet-repository");
 const custom_error_1 = require("../utils/custom-error");
+// Wallet must associated with userId
 class WalletService {
 }
 exports.WalletService = WalletService;
 _a = WalletService;
-WalletService.createOwnWallet = (req) => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const isUserExist = yield user_repository_1.UserRepository.isUserExistById(req.userId);
+        if (!isUserExist)
+            throw custom_error_1.CustomError.notFound(`User not found`);
         const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.userId
@@ -43,44 +48,45 @@ WalletService.createOwnWallet = (req) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         if (error instanceof custom_error_1.CustomError)
             throw error;
-        winston_1.logger.error(`[createOwnWallet] Service error creating own wallet: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to create own wallet');
+        winston_1.logger.error(`[createWallet] Service error creating wallet: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to create wallet');
     }
 });
-WalletService.getOwnBalance = (req) => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const isUserExist = yield user_repository_1.UserRepository.isUserExistById(req.userId);
+        if (!isUserExist)
+            throw custom_error_1.CustomError.notFound(`User not found`);
         const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.balance
             ],
             filterFields: [{
-                    field: wallet_model_1.WALLET_DB_FIELD.balance,
+                    field: wallet_model_1.WALLET_DB_FIELD.userId,
                     operator: 'equals',
                     value: req.userId
                 }]
         });
         if (wallets.count === 0)
             throw custom_error_1.CustomError.notFound('User does not have a wallet');
-        console.log(wallets);
         const response = {
             data: wallets.data[0],
             metadata: {
                 isFromCache: false
             }
         };
-        console.log(response);
         return response;
     }
     catch (error) {
         if (error instanceof custom_error_1.CustomError)
             throw error;
-        winston_1.logger.error(`[getOwnBalance] Service error get own balance: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to get own balance');
+        winston_1.logger.error(`[getBalanceFromWalletByUserId] Service error getting balance from wallet by user id: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to get balance from wallet by user id');
     }
 });
-WalletService.deposit = () => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.depositToWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
 });
-WalletService.confirmDeposit = () => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.confirmDepositToWallet = () => __awaiter(void 0, void 0, void 0, function* () {
 });
-WalletService.withdraw = () => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.withdrawFromWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
 });

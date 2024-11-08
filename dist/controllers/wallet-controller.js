@@ -23,7 +23,7 @@ WalletController.createOwnWallet = (req, res, next) => __awaiter(void 0, void 0,
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const message = yield wallet_service_1.WalletService.createOwnWallet({
+        const message = yield wallet_service_1.WalletService.createWalletByUserId({
             userId,
             email
         });
@@ -33,10 +33,10 @@ WalletController.createOwnWallet = (req, res, next) => __awaiter(void 0, void 0,
         next(error);
     }
 });
-WalletController.getOwnBalance = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+WalletController.getOwnBalanceFromWallet = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const result = yield wallet_service_1.WalletService.getOwnBalance({
+        const result = yield wallet_service_1.WalletService.getBalanceFromWalletByUserId({
             userId
         });
         (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, result.data, result.metadata);

@@ -49,7 +49,7 @@ Promise.all([(0, connection_check_1.initDbConnection)(), (0, connection_check_1.
     // Create an HTTP server instance from the Express app
     const server = (0, http_1.createServer)(app);
     server.listen(PORT, () => {
-        winston_1.logger.info(`Server is running on port ${PORT}`);
+        winston_1.logger.info(`Server running on port ${PORT}`);
     });
     // Handle startup errors
     server.on('error', (error) => {

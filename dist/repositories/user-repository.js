@@ -68,3 +68,16 @@ UserRepository.getUsersByFilter = (filter) => __awaiter(void 0, void 0, void 0, 
         throw custom_error_1.CustomError.internalServer('Failed to retrieve users by filter');
     }
 });
+UserRepository.isUserExistById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield prisma_client_1.prisma.voca_user.findUnique({
+            where: { id },
+            select: { id: true }
+        });
+        return user ? true : false;
+    }
+    catch (error) {
+        winston_1.logger.error('[isUserExistById] Repository error checking user by id');
+        throw custom_error_1.CustomError.internalServer('Failed to check user by id');
+    }
+});

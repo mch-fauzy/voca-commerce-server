@@ -46,11 +46,11 @@ ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, fu
     try {
         const product = yield product_repository_1.ProductRepository.getProductById(req.id);
         if (!product)
-            throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
+            throw custom_error_1.CustomError.notFound('Product not found');
         // Prevent updating if product is marked as deleted, unless it's being restored
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
-            throw custom_error_1.CustomError.forbidden(`Product with id ${req.id} is marked as deleted and cannot be updated.`);
+            throw custom_error_1.CustomError.forbidden('Product marked as deleted and cannot be updated');
         /*
         // Below will not trigger type error because Excess Property Checks not triggered when CreateProduct object assigned to a variable
         const request: CreateProduct = {
@@ -87,10 +87,10 @@ ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0
     try {
         const product = yield product_repository_1.ProductRepository.getProductById(req.id);
         if (!product)
-            throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
+            throw custom_error_1.CustomError.notFound('Product not found');
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
-            throw custom_error_1.CustomError.conflict(`Product with id ${req.id} is already marked as deleted.`);
+            throw custom_error_1.CustomError.conflict('Product already marked as deleted');
         yield product_repository_1.ProductRepository.updateProductById(req.id, {
             deletedAt: new Date(),
             deletedBy: req.email
@@ -110,11 +110,11 @@ ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, f
     try {
         const product = yield product_repository_1.ProductRepository.getProductById(req.id);
         if (!product)
-            throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
+            throw custom_error_1.CustomError.notFound('Product not found');
         // Prevent restore if product not marked as deleted
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
-            throw custom_error_1.CustomError.conflict(`Product with id ${req.id} cannot be restored because it is not marked as deleted`);
+            throw custom_error_1.CustomError.conflict('Product not marked as deleted and cannot be restored');
         yield product_repository_1.ProductRepository.updateProductById(req.id, {
             deletedAt: null,
             deletedBy: null
@@ -134,11 +134,11 @@ ProductService.deleteProductById = (req) => __awaiter(void 0, void 0, void 0, fu
     try {
         const product = yield product_repository_1.ProductRepository.getProductById(req.id);
         if (!product)
-            throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
+            throw custom_error_1.CustomError.notFound('Product not found');
         // Additional security to reduce accident caused by deletion
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
-            throw custom_error_1.CustomError.forbidden(`Product with id ${req.id} is not marked as deleted`);
+            throw custom_error_1.CustomError.forbidden('Product not marked as deleted');
         yield product_repository_1.ProductRepository.deleteProductById(req.id);
         yield redis_cache_1.RedisUtils.deleteCacheByKey(`${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
         yield redis_cache_1.RedisUtils.deleteCacheFromSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY);
@@ -166,7 +166,7 @@ ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, funct
         }
         const product = yield product_repository_1.ProductRepository.getProductById(req.id);
         if (!product)
-            throw custom_error_1.CustomError.notFound(`Product with id ${req.id} is not found`);
+            throw custom_error_1.CustomError.notFound('Product not found');
         const response = {
             data: product,
             metadata: {
