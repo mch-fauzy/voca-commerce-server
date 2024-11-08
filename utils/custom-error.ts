@@ -17,27 +17,27 @@ class CustomError extends Error {
 
     static notFound = (message: string) => {
         return new CustomError(message, StatusCodes.NOT_FOUND)
-    }
+    };
 
     static unauthorized = (message: string) => {
         return new CustomError(message, StatusCodes.UNAUTHORIZED)
-    }
+    };
 
     static forbidden = (message: string) => {
         return new CustomError(message, StatusCodes.FORBIDDEN)
-    }
+    };
 
     static internalServer = (message: string) => {
         return new CustomError(message, StatusCodes.INTERNAL_SERVER_ERROR)
-    }
+    };
 
     static badRequest = (message: string) => {
         return new CustomError(message, StatusCodes.BAD_REQUEST)
-    }
+    };
 
     static conflict = (message: string) => {
         return new CustomError(message, StatusCodes.CONFLICT)
-    }
+    };
 }
 
 export { CustomError };

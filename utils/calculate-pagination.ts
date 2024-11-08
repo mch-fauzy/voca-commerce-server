@@ -9,6 +9,6 @@ const calculatePaginationMetadata = (totalRows: number, currentPage: number, pag
         nextPage,
         previousPage
     };
-}
+};
 
 export { calculatePaginationMetadata };

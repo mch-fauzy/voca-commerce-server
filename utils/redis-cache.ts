@@ -6,13 +6,13 @@ class RedisUtils {
     // Generate a hashed key
     static generateHashedCacheKey = (keyIdentifier: string, data: string | object): string => {
         return `${keyIdentifier}:${createHash('md5').update(JSON.stringify(data)).digest('hex')}`;
-    }
+    };
 
     // Retrieve cached data
     static getCacheByKey = async (key: string) => {
         const cacheData = await redis.get(key);
         return cacheData;
-    }
+    };
 
     // Store the cache data
     static storeCacheWithExpiry = async (key: string, expiry: number, data: string) => {
@@ -21,18 +21,18 @@ class RedisUtils {
             expiry,
             data
         );
-    }
+    };
 
     // Delete a single cache (used for operations like getProductById)
     static deleteCacheByKey = async (key: string) => {
         return await redis.del(key);
-    }
+    };
 
     /* Used for operations related for complex key like getAllProducts, getProductsByFilter */
     // Add the stored cache in a Redis set for easy invalidation (THIS IS NOT STORE THE CACHE DATA)
     static addCacheToSet = async (setKey: string, key: string) => {
         return await redis.sadd(setKey, key);
-    }
+    };
 
     // Delete all cache related to set
     static deleteCacheFromSet = async (setKey: string) => {
@@ -46,7 +46,7 @@ class RedisUtils {
                 redis.del(setKey)
             ]);
         }
-    }
+    };
 }
 
 export { RedisUtils };

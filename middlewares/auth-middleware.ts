@@ -23,13 +23,14 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
 
         const decodedTokenPayload = decodedToken as TokenPayload;
 
-        // Check if email and role are present
-        if (!decodedTokenPayload.email || !decodedTokenPayload.role) {
+        // Check if userId, email, and role are present
+        if (!decodedTokenPayload.userId || !decodedTokenPayload.email || !decodedTokenPayload.role) {
             responseWithMessage(res, StatusCodes.UNAUTHORIZED, 'Incomplete token payload');
             return;
         }
 
         // Set decoded token details to custom headers
+        req.headers[CONSTANTS.HEADERS.USERID] = decodedTokenPayload.userId
         req.headers[CONSTANTS.HEADERS.EMAIL] = decodedTokenPayload.email;
         req.headers[CONSTANTS.HEADERS.ROLE] = decodedTokenPayload.role;
         req.headers[CONSTANTS.HEADERS.IAT] = String(decodedTokenPayload.iat);

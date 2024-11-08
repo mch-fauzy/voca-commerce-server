@@ -22,14 +22,12 @@ class AuthService {
                 selectFields: [
                     USER_DB_FIELD.email
                 ],
-                filterFields: [
-                    {
-                        field: USER_DB_FIELD.email,
-                        operator: 'equals',
-                        value: req.email
-                    }
-                ]
-            })
+                filterFields: [{
+                    field: USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }]
+            });
             if (users.count !== 0) throw CustomError.conflict('Account with this email already exists');
 
             const userId = uuidv4();
@@ -50,23 +48,22 @@ class AuthService {
             logger.error(`[register] Service error registering user: ${error}`);
             throw CustomError.internalServer('Failed to register user');
         }
-    }
+    };
 
     static login = async (req: LoginRequest) => {
         try {
             const users = await UserRepository.getUsersByFilter({
                 selectFields: [
+                    USER_DB_FIELD.id,
                     USER_DB_FIELD.email,
                     USER_DB_FIELD.password,
                     USER_DB_FIELD.role
                 ],
-                filterFields: [
-                    {
-                        field: USER_DB_FIELD.email,
-                        operator: 'equals',
-                        value: req.email
-                    }
-                ]
+                filterFields: [{
+                    field: USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }]
             });
             if (users.count === 0) throw CustomError.unauthorized('Invalid credentials');
 
@@ -75,6 +72,7 @@ class AuthService {
             if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
 
             const response: LoginResponse = generateToken({
+                userId: user.id,
                 email: user.email,
                 role: user.role
             });
@@ -86,7 +84,7 @@ class AuthService {
             logger.error(`[login] Service error login user: ${error}`);
             throw CustomError.internalServer('Failed to login user');
         }
-    }
+    };
 }
 
 export { AuthService };

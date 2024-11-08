@@ -20,17 +20,17 @@ class UserRepository {
         try {
             const { selectFields, filterFields, pagination, sorts } = filter;
 
-            // Handle select specific field
+            // Handle select specific field (output: create a single object from array of array)
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => [field, true])
+                    selectFields.map((field) => [field, true]) // array of array
                 )
                 : undefined;
 
-            // Handle filter field (output: create a single object from array)
+            // Handle filter field (output: create a single object from array of array)
             const where = filterFields
                 ? Object.fromEntries(
-                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }])
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
                 )
                 : undefined;
 
@@ -63,7 +63,7 @@ class UserRepository {
             logger.error(`[getUsersByFilter] Repository error retrieving users by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve users by filter');
         }
-    }
+    };
 }
 
 export { UserRepository };

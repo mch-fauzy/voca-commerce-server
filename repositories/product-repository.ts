@@ -18,7 +18,7 @@ class ProductRepository {
             logger.error(`[createProduct] Repository error creating product: ${error}`);
             throw CustomError.internalServer('Failed to create product');
         }
-    }
+    };
 
     static updateProductById = async (id: number, data: UpdateProduct | SoftDeleteProduct) => {
         try {
@@ -32,7 +32,7 @@ class ProductRepository {
             logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
             throw CustomError.internalServer('Failed to update product by id');
         }
-    }
+    };
 
     static deleteProductById = async (id: number) => {
         try {
@@ -43,16 +43,16 @@ class ProductRepository {
             logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
             throw CustomError.internalServer('Failed to delete product by id');
         }
-    }
+    };
 
     static getProductById = async (id: number, fields?: Pick<Filter, 'selectFields'>) => {
         try {
             const { selectFields } = fields ?? {};
 
-            // Handle select specific field
+            // Handle select specific field (output: create a single object from array of array)
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => [field, true])
+                    selectFields.map((field) => [field, true]) // array of array
                 )
                 : undefined;
 
@@ -66,23 +66,23 @@ class ProductRepository {
             logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
             throw CustomError.internalServer('Failed to retrieve product by id');
         }
-    }
+    };
 
     static getProductsByFilter = async (filter: Filter) => {
         try {
             const { selectFields, filterFields, pagination, sorts } = filter;
 
-            // Handle select specific field
+            // Handle select specific field (output: create a single object from array of array)
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => [field, true])
+                    selectFields.map((field) => [field, true]) // array of array
                 )
                 : undefined;
 
-            // Handle filter field (output: create a single object from array)
+            // Handle filter field (output: create a single object from array of array)
             const where = filterFields
                 ? Object.fromEntries(
-                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }])
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
                 )
                 : undefined;
 
@@ -115,7 +115,7 @@ class ProductRepository {
             logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve products by filter');
         }
-    }
+    };
 
     static isProductExistById = async (id: number) => {
         try {
@@ -129,7 +129,7 @@ class ProductRepository {
             logger.error('[isProductExistById] Repository error checking product by id');
             throw CustomError.internalServer('Failed to check product by id');
         }
-    }
+    };
 }
 
 export { ProductRepository };

@@ -14,6 +14,7 @@ const CONSTANTS = {
         EXPIRY: 60 * 60
     },
     HEADERS: {
+        USERID: 'x-userid',
         EMAIL: 'x-email',
         ROLE: 'x-role',
         IAT: 'x-iat',
@@ -28,4 +29,4 @@ const CONSTANTS = {
     }
 };
 
-export { CONSTANTS }
+export { CONSTANTS };

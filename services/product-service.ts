@@ -20,16 +20,14 @@ import { calculatePaginationMetadata } from '../utils/calculate-pagination';
 class ProductService {
     static createProduct = async (req: CreateProductRequest) => {
         try {
-            await ProductRepository.createProduct(
-                {
-                    name: req.name,
-                    description: req.description,
-                    price: req.price,
-                    available: req.available,
-                    createdBy: req.email,
-                    updatedBy: req.email
-                }
-            );
+            await ProductRepository.createProduct({
+                name: req.name,
+                description: req.description,
+                price: req.price,
+                available: req.available,
+                createdBy: req.email,
+                updatedBy: req.email
+            });
 
             // Delete all cache related to set if new data created
             await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
@@ -39,7 +37,7 @@ class ProductService {
             logger.error(`[createProduct] Service error creating product: ${error}`);
             throw CustomError.internalServer('Failed to create product');
         }
-    }
+    };
 
     static updateProductById = async (req: UpdateProductByIdRequest) => {
         try {
@@ -65,15 +63,13 @@ class ProductService {
             */
 
             // Assign object explicitly to enforce strict type (Excess Property Checks), because excess property will updated in db
-            await ProductRepository.updateProductById(req.id,
-                {
-                    name: req.name,
-                    description: req.description,
-                    price: req.price,
-                    available: req.available,
-                    updatedBy: req.email
-                }
-            );
+            await ProductRepository.updateProductById(req.id, {
+                name: req.name,
+                description: req.description,
+                price: req.price,
+                available: req.available,
+                updatedBy: req.email
+            });
 
             await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
             await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
@@ -85,7 +81,7 @@ class ProductService {
             logger.error(`[updateProductById] Service error updating product by id: ${error}`);
             throw CustomError.internalServer('Failed to update product by id');
         }
-    }
+    };
 
     static softDeleteProductById = async (req: SoftDeleteProductByIdRequest) => {
         try {
@@ -95,12 +91,10 @@ class ProductService {
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} is already marked as deleted.`);
 
-            await ProductRepository.updateProductById(req.id,
-                {
-                    deletedAt: new Date(),
-                    deletedBy: req.email
-                }
-            );
+            await ProductRepository.updateProductById(req.id, {
+                deletedAt: new Date(),
+                deletedBy: req.email
+            });
 
             await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
             await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
@@ -112,7 +106,7 @@ class ProductService {
             logger.error(`[softDeleteProductById] Service error soft deleting product by id: ${error}`);
             throw CustomError.internalServer('Failed to soft delete product by id');
         }
-    }
+    };
 
     static restoreProductById = async (req: Pick<SoftDeleteProductByIdRequest, 'id'>) => {
         try {
@@ -123,12 +117,10 @@ class ProductService {
             const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
             if (!isProductMarkedAsDeleted) throw CustomError.conflict(`Product with id ${req.id} cannot be restored because it is not marked as deleted`);
 
-            await ProductRepository.updateProductById(req.id,
-                {
-                    deletedAt: null,
-                    deletedBy: null
-                }
-            );
+            await ProductRepository.updateProductById(req.id, {
+                deletedAt: null,
+                deletedBy: null
+            });
 
             await RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`);
             await RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY);
@@ -140,7 +132,7 @@ class ProductService {
             logger.error(`[restoreProductById] Service error restoring product by id: ${error}`);
             throw CustomError.internalServer('Failed to restore product by id');
         }
-    }
+    };
 
     static deleteProductById = async (req: DeleteProductByIdRequest) => {
         try {
@@ -163,7 +155,7 @@ class ProductService {
             logger.error(`[deleteProductById] Service error deleting product by id: ${error}`);
             throw CustomError.internalServer('Failed to delete product by id');
         }
-    }
+    };
 
     static getProductById = async (req: GetProductByIdRequest) => {
         try {
@@ -201,7 +193,7 @@ class ProductService {
             logger.error(`[getProductById] Service error retrieving product by id: ${error}`);
             throw CustomError.internalServer('Failed to retrieve product by id');
         }
-    }
+    };
 
     static getProductsByFilter = async (req: GetProductsByFilterRequest) => {
         try {
@@ -234,18 +226,16 @@ class ProductService {
                         field: PRODUCT_DB_FIELD.name,
                         operator: 'contains', // Case-sensitive
                         value: req.name
-                    },
+                    }
                 ],
                 pagination: {
                     page: req.page,
                     pageSize: req.pageSize
                 },
-                sorts: [
-                    {
-                        field: req.sort,
-                        order: req.order
-                    }
-                ]
+                sorts: [{
+                    field: req.sort,
+                    order: req.order
+                }]
             });
 
             const pagination = calculatePaginationMetadata(products.count, req.page, req.pageSize);
@@ -272,7 +262,7 @@ class ProductService {
             logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve products by filter');
         }
-    }
+    };
 }
 
 export { ProductService };

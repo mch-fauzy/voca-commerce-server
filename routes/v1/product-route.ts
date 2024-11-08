@@ -12,6 +12,7 @@ productRouterV1.patch('/products/:id', authenticateToken, authorizeAdmin, Produc
 productRouterV1.patch('/products/:id/soft-delete', authenticateToken, authorizeAdmin, ProductController.softDeleteProductById);
 productRouterV1.patch('/products/:id/restore', authenticateToken, authorizeAdmin, ProductController.restoreProductById);
 
+// If query parameters to complex, use body to query, e.g /products/search
 productRouterV1.get('/products', authenticateToken, ProductController.getProductsByFilter);
 
 export { productRouterV1 };

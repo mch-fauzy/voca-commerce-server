@@ -24,6 +24,7 @@ interface LoginResponse {
 }
 
 interface TokenPayload extends JwtPayload {
+    userId: string;
     email: string;
     role: Role;
 }
@@ -37,7 +38,7 @@ class AuthValidator {
 
     static validateRegisterBody = async (body: AuthBody): Promise<AuthBody> => {
         return await this.registerBodyValidator.validateAsync(body);
-    }
+    };
 
     // Login section
     private static loginBodyValidator = Joi.object({
@@ -47,7 +48,7 @@ class AuthValidator {
 
     static validateLoginBody = async (body: AuthBody): Promise<AuthBody> => {
         return await this.loginBodyValidator.validateAsync(body);
-    }
+    };
 }
 
 export {

@@ -55,11 +55,11 @@ class ProductValidator {
         description: Joi.string().optional().allow(null),
         price: Joi.number().min(0).required(),
         available: Joi.boolean().required(),
-    })
+    });
 
     static validateCreateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
         return await this.createProductBodyValidator.validateAsync(body);
-    }
+    };
 
     // Update product section
     private static updateProductBodyValidator = Joi.object({
@@ -67,11 +67,11 @@ class ProductValidator {
         description: Joi.string().optional().allow(null),
         price: Joi.number().min(0).optional(),
         available: Joi.boolean().optional(),
-    }).or('name', 'description', 'price', 'available') // At least one field must be present
+    }).or('name', 'description', 'price', 'available'); // At least one field must be present
 
     static validateUpdateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
         return await this.updateProductBodyValidator.validateAsync(body);
-    }
+    };
 
     private static getProductsByFilterQueryValidator = Joi.object({
         page: Joi.number().min(1).optional(),
@@ -79,11 +79,11 @@ class ProductValidator {
         name: Joi.string().optional(),
         sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
         order: Joi.string().optional().valid('asc', 'desc')
-    })
+    });
 
     static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
         return await this.getProductsByFilterQueryValidator.validateAsync(query);
-    }
+    };
 }
 
 export {
