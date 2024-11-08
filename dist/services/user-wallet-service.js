@@ -10,16 +10,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WalletService = void 0;
+exports.UserWalletService = void 0;
 const winston_1 = require("../configs/winston");
 const wallet_model_1 = require("../models/wallet-model");
 const wallet_repository_1 = require("../repositories/wallet-repository");
 const custom_error_1 = require("../utils/custom-error");
-class WalletService {
+class UserWalletService {
 }
-exports.WalletService = WalletService;
-_a = WalletService;
-WalletService.createOwnWallet = (req) => __awaiter(void 0, void 0, void 0, function* () {
+exports.UserWalletService = UserWalletService;
+_a = UserWalletService;
+UserWalletService.createWallet = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
@@ -47,7 +47,7 @@ WalletService.createOwnWallet = (req) => __awaiter(void 0, void 0, void 0, funct
         throw custom_error_1.CustomError.internalServer('Failed to create own wallet');
     }
 });
-WalletService.getOwnBalance = (req) => __awaiter(void 0, void 0, void 0, function* () {
+UserWalletService.getBalance = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
@@ -78,9 +78,9 @@ WalletService.getOwnBalance = (req) => __awaiter(void 0, void 0, void 0, functio
         throw custom_error_1.CustomError.internalServer('Failed to get own balance');
     }
 });
-WalletService.deposit = () => __awaiter(void 0, void 0, void 0, function* () {
+UserWalletService.deposit = () => __awaiter(void 0, void 0, void 0, function* () {
 });
-WalletService.confirmDeposit = () => __awaiter(void 0, void 0, void 0, function* () {
+UserWalletService.confirmDeposit = () => __awaiter(void 0, void 0, void 0, function* () {
 });
-WalletService.withdraw = () => __awaiter(void 0, void 0, void 0, function* () {
+UserWalletService.withdraw = () => __awaiter(void 0, void 0, void 0, function* () {
 });

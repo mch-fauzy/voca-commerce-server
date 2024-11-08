@@ -54,9 +54,10 @@ ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, 
 ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
-        // Handle select specific field
+        // Handle select specific field (output: create a single object from array of array)
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => [field, true]))
+            ? Object.fromEntries(selectFields.map((field) => [field, true]) // array of array
+            )
             : undefined;
         const product = yield prisma_client_1.prisma.voca_product.findUnique({
             where: { id: id },
@@ -72,13 +73,15 @@ ProductRepository.getProductById = (id, fields) => __awaiter(void 0, void 0, voi
 ProductRepository.getProductsByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields, filterFields, pagination, sorts } = filter;
-        // Handle select specific field
+        // Handle select specific field (output: create a single object from array of array)
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => [field, true]))
+            ? Object.fromEntries(selectFields.map((field) => [field, true]) // array of array
+            )
             : undefined;
-        // Handle filter field (output: create a single object from array)
+        // Handle filter field (output: create a single object from array of array)
         const where = filterFields
-            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]))
+            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
+            )
             : undefined;
         // Handle pagination
         const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;

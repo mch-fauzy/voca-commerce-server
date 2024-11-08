@@ -214,18 +214,16 @@ ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, 
                     field: product_model_1.PRODUCT_DB_FIELD.name,
                     operator: 'contains', // Case-sensitive
                     value: req.name
-                },
+                }
             ],
             pagination: {
                 page: req.page,
                 pageSize: req.pageSize
             },
-            sorts: [
-                {
+            sorts: [{
                     field: req.sort,
                     order: req.order
-                }
-            ]
+                }]
         });
         const pagination = (0, calculate_pagination_1.calculatePaginationMetadata)(products.count, req.page, req.pageSize);
         const response = {

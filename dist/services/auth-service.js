@@ -28,13 +28,11 @@ AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
             selectFields: [
                 user_model_1.USER_DB_FIELD.email
             ],
-            filterFields: [
-                {
+            filterFields: [{
                     field: user_model_1.USER_DB_FIELD.email,
                     operator: 'equals',
                     value: req.email
-                }
-            ]
+                }]
         });
         if (users.count !== 0)
             throw custom_error_1.CustomError.conflict('Account with this email already exists');
@@ -61,17 +59,16 @@ AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield user_repository_1.UserRepository.getUsersByFilter({
             selectFields: [
+                user_model_1.USER_DB_FIELD.id,
                 user_model_1.USER_DB_FIELD.email,
                 user_model_1.USER_DB_FIELD.password,
                 user_model_1.USER_DB_FIELD.role
             ],
-            filterFields: [
-                {
+            filterFields: [{
                     field: user_model_1.USER_DB_FIELD.email,
                     operator: 'equals',
                     value: req.email
-                }
-            ]
+                }]
         });
         if (users.count === 0)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
@@ -80,6 +77,7 @@ AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
         if (!isValidPassword)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
         const response = (0, jwt_1.generateToken)({
+            userId: user.id,
             email: user.email,
             role: user.role
         });

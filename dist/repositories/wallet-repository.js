@@ -44,13 +44,15 @@ WalletRepository.updateWalletById = (id, data) => __awaiter(void 0, void 0, void
 WalletRepository.getWalletsByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields, filterFields, pagination, sorts } = filter;
-        // Handle select specific field
+        // Handle select specific field (output: create a single object from array of array)
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => [field, true]))
+            ? Object.fromEntries(selectFields.map((field) => [field, true]) // array of array
+            )
             : undefined;
-        // Handle filter field (output: create a single object from array)
+        // Handle filter field (output: create a single object from array of array)
         const where = filterFields
-            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]))
+            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
+            )
             : undefined;
         // Handle pagination
         const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;

@@ -12,4 +12,5 @@ productRouterV1.delete('/products/:id', auth_middleware_1.authenticateToken, aut
 productRouterV1.patch('/products/:id', auth_middleware_1.authenticateToken, auth_middleware_1.authorizeAdmin, product_controller_1.ProductController.updateProductById);
 productRouterV1.patch('/products/:id/soft-delete', auth_middleware_1.authenticateToken, auth_middleware_1.authorizeAdmin, product_controller_1.ProductController.softDeleteProductById);
 productRouterV1.patch('/products/:id/restore', auth_middleware_1.authenticateToken, auth_middleware_1.authorizeAdmin, product_controller_1.ProductController.restoreProductById);
+// If query parameters to complex, use body to query, e.g /products/search
 productRouterV1.get('/products', auth_middleware_1.authenticateToken, product_controller_1.ProductController.getProductsByFilter);

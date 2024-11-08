@@ -19,12 +19,13 @@ const authenticateToken = (req, res, next) => {
             return;
         }
         const decodedTokenPayload = decodedToken;
-        // Check if email and role are present
-        if (!decodedTokenPayload.email || !decodedTokenPayload.role) {
+        // Check if userId, email, and role are present
+        if (!decodedTokenPayload.userId || !decodedTokenPayload.email || !decodedTokenPayload.role) {
             (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.UNAUTHORIZED, 'Incomplete token payload');
             return;
         }
         // Set decoded token details to custom headers
+        req.headers[constants_1.CONSTANTS.HEADERS.USERID] = decodedTokenPayload.userId;
         req.headers[constants_1.CONSTANTS.HEADERS.EMAIL] = decodedTokenPayload.email;
         req.headers[constants_1.CONSTANTS.HEADERS.ROLE] = decodedTokenPayload.role;
         req.headers[constants_1.CONSTANTS.HEADERS.IAT] = String(decodedTokenPayload.iat);
