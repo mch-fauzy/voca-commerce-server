@@ -17,13 +17,13 @@ class AuthController {
     static registerUser = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body = await AuthValidator.validateRegisterBody(req.body);
-            const message = await AuthService.register({
+            const response = await AuthService.register({
                 email: body.email,
                 password: body.password,
                 role: CONSTANTS.ROLES.USER,
             });
 
-            responseWithMessage(res, StatusCodes.CREATED, message);
+            responseWithMessage(res, StatusCodes.CREATED, response);
         } catch (error) {
             // Pass the error to the error handler
             next(error);
@@ -33,13 +33,13 @@ class AuthController {
     static registerAdmin = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body = await AuthValidator.validateRegisterBody(req.body);
-            const message = await AuthService.register({
+            const response = await AuthService.register({
                 email: body.email,
                 password: body.password,
                 role: CONSTANTS.ROLES.ADMIN,
             });
 
-            responseWithMessage(res, StatusCodes.CREATED, message);
+            responseWithMessage(res, StatusCodes.CREATED, response);
         } catch (error) {
             next(error);
         }
@@ -48,12 +48,12 @@ class AuthController {
     static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const body = await AuthValidator.validateLoginBody(req.body);
-            const result = await AuthService.login({
+            const response = await AuthService.login({
                 email: body.email,
                 password: body.password
             });
 
-            responseWithData(res, StatusCodes.OK, result);
+            responseWithData(res, StatusCodes.OK, response);
         } catch (error) {
             next(error);
         }

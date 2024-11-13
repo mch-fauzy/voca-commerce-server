@@ -25,14 +25,14 @@ ProductController.createProduct = (req, res, next) => __awaiter(void 0, void 0, 
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
         const body = yield product_dto_1.ProductValidator.validateCreateProductBody(req.body);
         // Assign object explicitly to enforce strict type (Excess Property Checks)
-        const message = yield product_service_1.ProductService.createProduct({
+        const response = yield product_service_1.ProductService.createProduct({
             email,
             name: body.name,
             description: body.description,
             price: body.price,
             available: body.available,
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);
@@ -43,7 +43,7 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
         const { id } = req.params;
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
         const body = yield product_dto_1.ProductValidator.validateUpdateProductBody(req.body);
-        const message = yield product_service_1.ProductService.updateProductById({
+        const response = yield product_service_1.ProductService.updateProductById({
             id: Number(id),
             email,
             name: body.name,
@@ -51,7 +51,7 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
             price: body.price,
             available: body.available
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -60,10 +60,10 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
 ProductController.deleteProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const message = yield product_service_1.ProductService.deleteProductById({
+        const response = yield product_service_1.ProductService.deleteProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -73,11 +73,11 @@ ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, 
     try {
         const { id } = req.params;
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const message = yield product_service_1.ProductService.softDeleteProductById({
+        const response = yield product_service_1.ProductService.softDeleteProductById({
             id: Number(id),
             email,
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -86,10 +86,10 @@ ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, 
 ProductController.restoreProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const message = yield product_service_1.ProductService.restoreProductById({
+        const response = yield product_service_1.ProductService.restoreProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -98,10 +98,10 @@ ProductController.restoreProductById = (req, res, next) => __awaiter(void 0, voi
 ProductController.getProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const result = yield product_service_1.ProductService.getProductById({
+        const response = yield product_service_1.ProductService.getProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, result.data, result.metadata);
+        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);
@@ -111,14 +111,14 @@ ProductController.getProductsByFilter = (req, res, next) => __awaiter(void 0, vo
     var _b, _c, _d;
     try {
         const query = yield product_dto_1.ProductValidator.validateGetProductsByFilterQuery(req.query);
-        const result = yield product_service_1.ProductService.getProductsByFilter({
+        const response = yield product_service_1.ProductService.getProductsByFilter({
             name: query.name,
             sort: query.sort,
             order: (_b = query.order) !== null && _b !== void 0 ? _b : 'desc',
             page: (_c = query.page) !== null && _c !== void 0 ? _c : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGE, // if null or undefined then use default value
             pageSize: (_d = query.pageSize) !== null && _d !== void 0 ? _d : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGESIZE
         });
-        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, result.data, result.metadata);
+        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);

@@ -23,11 +23,11 @@ WalletController.createOwnWallet = (req, res, next) => __awaiter(void 0, void 0,
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const message = yield wallet_service_1.WalletService.createWalletByUserId({
+        const response = yield wallet_service_1.WalletService.createWalletByUserId({
             userId,
             email
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, message);
+        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);

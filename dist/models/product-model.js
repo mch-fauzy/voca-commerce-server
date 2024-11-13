@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PRODUCT_DB_FIELD = void 0;
+// Read-only properties
 const PRODUCT_DB_FIELD = {
     id: 'id',
     name: 'name',

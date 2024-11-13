@@ -22,7 +22,7 @@ exports.WalletService = WalletService;
 _a = WalletService;
 WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
+        const [_, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.userId
             ],
@@ -35,7 +35,7 @@ WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, 
         if (totalWallets !== 0)
             throw custom_error_1.CustomError.conflict('User already has an existing wallet');
         yield wallet_repository_1.WalletRepository.createWallet({
-            userId: wallets[0].userId,
+            userId: req.userId,
             createdBy: req.email,
             updatedBy: req.email
         });

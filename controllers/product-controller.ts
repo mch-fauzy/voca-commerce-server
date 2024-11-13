@@ -19,7 +19,7 @@ class ProductController {
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
             const body = await ProductValidator.validateCreateProductBody(req.body);
             // Assign object explicitly to enforce strict type (Excess Property Checks)
-            const message = await ProductService.createProduct({
+            const response = await ProductService.createProduct({
                 email,
                 name: body.name,
                 description: body.description,
@@ -27,7 +27,7 @@ class ProductController {
                 available: body.available,
             });
 
-            responseWithMessage(res, StatusCodes.CREATED, message);
+            responseWithMessage(res, StatusCodes.CREATED, response);
         } catch (error) {
             next(error);
         }
@@ -38,7 +38,7 @@ class ProductController {
             const { id } = req.params;
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
             const body = await ProductValidator.validateUpdateProductBody(req.body);
-            const message = await ProductService.updateProductById({
+            const response = await ProductService.updateProductById({
                 id: Number(id),
                 email,
                 name: body.name,
@@ -47,7 +47,7 @@ class ProductController {
                 available: body.available
             });
 
-            responseWithMessage(res, StatusCodes.OK, message);
+            responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
             next(error);
         }
@@ -56,11 +56,11 @@ class ProductController {
     static deleteProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const message = await ProductService.deleteProductById({
+            const response = await ProductService.deleteProductById({
                 id: Number(id)
             });
 
-            responseWithMessage(res, StatusCodes.OK, message);
+            responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
             next(error);
         }
@@ -70,12 +70,12 @@ class ProductController {
         try {
             const { id } = req.params;
             const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            const message = await ProductService.softDeleteProductById({
+            const response = await ProductService.softDeleteProductById({
                 id: Number(id),
                 email,
             });
 
-            responseWithMessage(res, StatusCodes.OK, message);
+            responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
             next(error);
         }
@@ -84,11 +84,11 @@ class ProductController {
     static restoreProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const message = await ProductService.restoreProductById({
+            const response = await ProductService.restoreProductById({
                 id: Number(id)
             });
 
-            responseWithMessage(res, StatusCodes.OK, message);
+            responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
             next(error);
         }
@@ -97,11 +97,11 @@ class ProductController {
     static getProductById = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const result = await ProductService.getProductById({
+            const response = await ProductService.getProductById({
                 id: Number(id)
             });
 
-            responseWithMetadata(res, StatusCodes.OK, result.data, result.metadata);
+            responseWithMetadata(res, StatusCodes.OK, response.data, response.metadata);
         } catch (error) {
             next(error);
         }
@@ -110,7 +110,7 @@ class ProductController {
     static getProductsByFilter = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = await ProductValidator.validateGetProductsByFilterQuery(req.query);
-            const result = await ProductService.getProductsByFilter({
+            const response = await ProductService.getProductsByFilter({
                 name: query.name,
                 sort: query.sort,
                 order: query.order ?? 'desc',
@@ -118,7 +118,7 @@ class ProductController {
                 pageSize: query.pageSize ?? CONSTANTS.PAGINATION.DEFAULT_PAGESIZE
             });
 
-            responseWithMetadata(res, StatusCodes.OK, result.data, result.metadata);
+            responseWithMetadata(res, StatusCodes.OK, response.data, response.metadata);
         } catch (error) {
             next(error);
         }
