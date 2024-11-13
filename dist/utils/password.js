@@ -17,8 +17,8 @@ const hashPassword = (password_1, ...args_1) => __awaiter(void 0, [password_1, .
     return hashedPassword;
 });
 exports.hashPassword = hashPassword;
-const comparePassword = (inputPassword, storedPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    const isValidPassword = yield (0, bcryptjs_1.compare)(inputPassword, storedPassword);
+const comparePassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const isValidPassword = yield (0, bcryptjs_1.compare)(password, hashedPassword);
     return isValidPassword;
 });
 exports.comparePassword = comparePassword;

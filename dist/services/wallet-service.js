@@ -13,7 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletService = void 0;
 const winston_1 = require("../configs/winston");
 const wallet_model_1 = require("../models/wallet-model");
-const user_repository_1 = require("../repositories/user-repository");
 const wallet_repository_1 = require("../repositories/wallet-repository");
 const custom_error_1 = require("../utils/custom-error");
 // Wallet must associated with userId
@@ -23,10 +22,7 @@ exports.WalletService = WalletService;
 _a = WalletService;
 WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isUserExist = yield user_repository_1.UserRepository.isUserExistById(req.userId);
-        if (!isUserExist)
-            throw custom_error_1.CustomError.notFound(`User not found`);
-        const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
+        const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.userId
             ],
@@ -36,10 +32,10 @@ WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, 
                     value: req.userId
                 }]
         });
-        if (wallets.count !== 0)
+        if (totalWallets !== 0)
             throw custom_error_1.CustomError.conflict('User already has an existing wallet');
         yield wallet_repository_1.WalletRepository.createWallet({
-            userId: req.userId,
+            userId: wallets[0].userId,
             createdBy: req.email,
             updatedBy: req.email
         });
@@ -54,10 +50,7 @@ WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, 
 });
 WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isUserExist = yield user_repository_1.UserRepository.isUserExistById(req.userId);
-        if (!isUserExist)
-            throw custom_error_1.CustomError.notFound(`User not found`);
-        const wallets = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
+        const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.balance
             ],
@@ -67,13 +60,10 @@ WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, 
                     value: req.userId
                 }]
         });
-        if (wallets.count === 0)
+        if (totalWallets === 0)
             throw custom_error_1.CustomError.notFound('User does not have a wallet');
         const response = {
-            data: wallets.data[0],
-            metadata: {
-                isFromCache: false
-            }
+            balance: wallets[0].balance
         };
         return response;
     }
@@ -85,8 +75,14 @@ WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, 
     }
 });
 WalletService.depositToWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
-});
-WalletService.confirmDepositToWallet = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+    }
+    catch (error) {
+        if (error instanceof custom_error_1.CustomError)
+            throw error;
+        winston_1.logger.error(`[depositToWalletByUserId] Service error deposit to wallet by user id: ${error}`);
+        throw custom_error_1.CustomError.internalServer('Failed to deposit to wallet by user id');
+    }
 });
 WalletService.withdrawFromWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
 });

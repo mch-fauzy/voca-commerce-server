@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Role = exports.USER_DB_FIELD = void 0;
+exports.USER_DB_FIELD = exports.Role = void 0;
 const client_1 = require("@prisma/client");
 Object.defineProperty(exports, "Role", { enumerable: true, get: function () { return client_1.voca_role; } });
+// Read-only property
 const USER_DB_FIELD = {
     id: 'id',
     email: 'email',

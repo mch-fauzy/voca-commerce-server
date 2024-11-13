@@ -24,7 +24,7 @@ exports.AuthService = AuthService;
 _a = AuthService;
 AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield user_repository_1.UserRepository.getUsersByFilter({
+        const [_, totalUsers] = yield user_repository_1.UserRepository.getUsersByFilter({
             selectFields: [
                 user_model_1.USER_DB_FIELD.email
             ],
@@ -34,7 +34,7 @@ AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
                     value: req.email
                 }]
         });
-        if (users.count !== 0)
+        if (totalUsers !== 0)
             throw custom_error_1.CustomError.conflict('Account with this email already exists');
         const userId = (0, uuid_1.v4)();
         const hashedPassword = yield (0, password_1.hashPassword)(req.password);
@@ -57,7 +57,7 @@ AuthService.register = (req) => __awaiter(void 0, void 0, void 0, function* () {
 });
 AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield user_repository_1.UserRepository.getUsersByFilter({
+        const [users, totalUsers] = yield user_repository_1.UserRepository.getUsersByFilter({
             selectFields: [
                 user_model_1.USER_DB_FIELD.id,
                 user_model_1.USER_DB_FIELD.email,
@@ -70,16 +70,15 @@ AuthService.login = (req) => __awaiter(void 0, void 0, void 0, function* () {
                     value: req.email
                 }]
         });
-        if (users.count === 0)
+        if (totalUsers === 0)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
-        const user = users.data[0];
-        const isValidPassword = yield (0, password_1.comparePassword)(req.password, user.password);
+        const isValidPassword = yield (0, password_1.comparePassword)(req.password, users[0].password);
         if (!isValidPassword)
             throw custom_error_1.CustomError.unauthorized('Invalid credentials');
         const response = (0, jwt_1.generateToken)({
-            userId: user.id,
-            email: user.email,
-            role: user.role
+            userId: users[0].id,
+            email: users[0].email,
+            role: users[0].role
         });
         return response;
     }

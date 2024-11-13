@@ -1,10 +1,13 @@
 import { sign } from 'jsonwebtoken';
 
-import { TokenPayload } from '../models/dto/auth-dto';
+import {
+    LoginResponse,
+    TokenPayload
+} from '../models/dto/auth-dto';
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from './constants';
 
-const generateToken = (req: Pick<TokenPayload, 'userId' | 'email' | 'role'>, type: string = 'Bearer') => {
+const generateToken = (req: Pick<TokenPayload, 'userId' | 'email' | 'role'>, type: string = 'Bearer'): LoginResponse => {
     const expireTime = CONSTANTS.JWT.EXPIRY;
     const token = sign(
         {

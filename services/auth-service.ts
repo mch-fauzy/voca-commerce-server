@@ -18,7 +18,7 @@ import { USER_DB_FIELD } from '../models/user-model';
 class AuthService {
     static register = async (req: RegisterRequest) => {
         try {
-            const users = await UserRepository.getUsersByFilter({
+            const [_, totalUsers] = await UserRepository.getUsersByFilter({
                 selectFields: [
                     USER_DB_FIELD.email
                 ],
@@ -28,7 +28,7 @@ class AuthService {
                     value: req.email
                 }]
             });
-            if (users.count !== 0) throw CustomError.conflict('Account with this email already exists');
+            if (totalUsers !== 0) throw CustomError.conflict('Account with this email already exists');
 
             const userId = uuidv4();
             const hashedPassword = await hashPassword(req.password);
@@ -50,9 +50,9 @@ class AuthService {
         }
     };
 
-    static login = async (req: LoginRequest) => {
+    static login = async (req: LoginRequest): Promise<LoginResponse> => {
         try {
-            const users = await UserRepository.getUsersByFilter({
+            const [users, totalUsers] = await UserRepository.getUsersByFilter({
                 selectFields: [
                     USER_DB_FIELD.id,
                     USER_DB_FIELD.email,
@@ -65,16 +65,15 @@ class AuthService {
                     value: req.email
                 }]
             });
-            if (users.count === 0) throw CustomError.unauthorized('Invalid credentials');
+            if (totalUsers === 0) throw CustomError.unauthorized('Invalid credentials');
 
-            const user = users.data[0]
-            const isValidPassword = await comparePassword(req.password, user.password);
+            const isValidPassword = await comparePassword(req.password, users[0].password);
             if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
 
-            const response: LoginResponse = generateToken({
-                userId: user.id,
-                email: user.email,
-                role: user.role
+            const response = generateToken({
+                userId: users[0].id,
+                email: users[0].email,
+                role: users[0].role
             });
 
             return response;

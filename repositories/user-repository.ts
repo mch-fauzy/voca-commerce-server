@@ -1,22 +1,33 @@
 import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
 import { Filter } from '../models/filter';
-import { CreateUser } from '../models/user-model';
+import {
+    CreateUser,
+    User,
+    UserPrimaryId
+} from '../models/user-model';
 import { CustomError } from '../utils/custom-error';
 
 class UserRepository {
     static createUser = async (data: CreateUser) => {
         try {
-            const createdUser = await prisma.voca_user.create({ data: data });
+            const primaryId: UserPrimaryId = {
+                id: data.id
+            };
 
-            return createdUser;
+            const isUserExistById = await this.isUserExistById(primaryId);
+            if (isUserExistById) throw CustomError.conflict(`User with this id already exists`);
+
+            await prisma.voca_user.create({ data: data });
+
+            return;
         } catch (error) {
             logger.error(`[createUser] Repository error creating user: ${error}`);
             throw CustomError.internalServer('Failed to create user');
         }
     };
 
-    static getUsersByFilter = async (filter: Filter) => {
+    static getUsersByFilter = async (filter: Filter): Promise<[User[], number]> => {
         try {
             const { selectFields, filterFields, pagination, sorts } = filter;
 
@@ -55,20 +66,17 @@ class UserRepository {
                 })
             ]);
 
-            return {
-                data: users,
-                count: totalUsers
-            };
+            return [users, totalUsers];
         } catch (error) {
             logger.error(`[getUsersByFilter] Repository error retrieving users by filter: ${error}`);
             throw CustomError.internalServer('Failed to retrieve users by filter');
         }
     };
 
-    static isUserExistById = async (id: string) => {
+    static isUserExistById = async (primaryId: UserPrimaryId) => {
         try {
             const user = await prisma.voca_user.findUnique({
-                where: { id },
+                where: { id: primaryId.id },
                 select: { id: true }
             });
 

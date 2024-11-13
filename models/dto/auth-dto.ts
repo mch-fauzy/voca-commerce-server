@@ -8,7 +8,9 @@ interface AuthBody {
     password: string;
 }
 
-interface RegisterRequest extends AuthBody {
+interface RegisterRequest {
+    email: string;
+    password: string;
     role: Role;
 }
 

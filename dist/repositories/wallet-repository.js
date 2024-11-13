@@ -20,23 +20,28 @@ exports.WalletRepository = WalletRepository;
 _a = WalletRepository;
 WalletRepository.createWallet = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const createdWallet = yield prisma_client_1.prisma.voca_wallet.create({ data: data });
-        return createdWallet;
+        yield prisma_client_1.prisma.voca_wallet.create({ data: data });
+        return;
     }
     catch (error) {
         winston_1.logger.error(`[createWallet] Repository error creating wallet: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to create wallet');
     }
 });
-WalletRepository.updateWalletById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.updateWalletById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const updatedWallet = yield prisma_client_1.prisma.voca_wallet.update({
-            where: { id: id },
+        const isWalletExistById = yield _a.isWalletExistById(primaryId);
+        if (!isWalletExistById)
+            throw custom_error_1.CustomError.notFound(`Wallet not found`);
+        yield prisma_client_1.prisma.voca_wallet.update({
+            where: { id: primaryId.id },
             data: data
         });
-        return updatedWallet;
+        return;
     }
     catch (error) {
+        if (error instanceof custom_error_1.CustomError)
+            throw error;
         winston_1.logger.error(`[updateWalletById] Repository error updating wallet by id: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to update wallet by id');
     }
@@ -71,13 +76,23 @@ WalletRepository.getWalletsByFilter = (filter) => __awaiter(void 0, void 0, void
                 where
             })
         ]);
-        return {
-            data: wallets,
-            count: totalWallets
-        };
+        return [wallets, totalWallets];
     }
     catch (error) {
         winston_1.logger.error(`[getWalletsByFilter] Repository error retrieving wallets by filter: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to retrieve wallets by filter');
+    }
+});
+WalletRepository.isWalletExistById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const product = yield prisma_client_1.prisma.voca_wallet.findUnique({
+            where: { id: primaryId.id },
+            select: { id: true }
+        });
+        return product ? true : false;
+    }
+    catch (error) {
+        winston_1.logger.error('[isWalletExistById] Repository error checking wallet by id');
+        throw custom_error_1.CustomError.internalServer('Failed to check wallet by id');
     }
 });

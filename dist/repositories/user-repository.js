@@ -20,8 +20,14 @@ exports.UserRepository = UserRepository;
 _a = UserRepository;
 UserRepository.createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const createdUser = yield prisma_client_1.prisma.voca_user.create({ data: data });
-        return createdUser;
+        const primaryId = {
+            id: data.id
+        };
+        const isUserExistById = yield _a.isUserExistById(primaryId);
+        if (isUserExistById)
+            throw custom_error_1.CustomError.conflict(`User with this id already exists`);
+        yield prisma_client_1.prisma.voca_user.create({ data: data });
+        return;
     }
     catch (error) {
         winston_1.logger.error(`[createUser] Repository error creating user: ${error}`);
@@ -58,20 +64,17 @@ UserRepository.getUsersByFilter = (filter) => __awaiter(void 0, void 0, void 0, 
                 where
             })
         ]);
-        return {
-            data: users,
-            count: totalUsers
-        };
+        return [users, totalUsers];
     }
     catch (error) {
         winston_1.logger.error(`[getUsersByFilter] Repository error retrieving users by filter: ${error}`);
         throw custom_error_1.CustomError.internalServer('Failed to retrieve users by filter');
     }
 });
-UserRepository.isUserExistById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+UserRepository.isUserExistById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield prisma_client_1.prisma.voca_user.findUnique({
-            where: { id },
+            where: { id: primaryId.id },
             select: { id: true }
         });
         return user ? true : false;

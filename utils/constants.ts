@@ -27,6 +27,6 @@ const CONSTANTS = {
     SERVER: {
         DEFAULT_PORT: 3000
     }
-};
+} as const;
 
 export { CONSTANTS };

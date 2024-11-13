@@ -36,10 +36,10 @@ WalletController.createOwnWallet = (req, res, next) => __awaiter(void 0, void 0,
 WalletController.getOwnBalanceFromWallet = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const result = yield wallet_service_1.WalletService.getBalanceFromWalletByUserId({
+        const response = yield wallet_service_1.WalletService.getBalanceFromWalletByUserId({
             userId
         });
-        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, result.data, result.metadata);
+        (0, http_response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);

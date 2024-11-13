@@ -6,8 +6,8 @@ const hashPassword = async (password: string, saltRounds: number = 10) => {
     return hashedPassword;
 };
 
-const comparePassword = async (inputPassword: string, storedPassword: string) => {
-    const isValidPassword = await compare(inputPassword, storedPassword);
+const comparePassword = async (password: string, hashedPassword: string) => {
+    const isValidPassword = await compare(password, hashedPassword);
     return isValidPassword;
 };
 
