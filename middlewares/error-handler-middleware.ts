@@ -1,14 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { CustomError } from '../utils/custom-error';
-import { responseWithMessage } from '../utils/http-response';
+import { Failure } from '../utils/failure';
+import { responseWithMessage } from '../utils/response'
 import { logger } from '../configs/winston';
 
 // NextFunction must be included to make error handler middleware to work properly
-const errorHandler = (error: CustomError | Error, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (error: Failure | Error, req: Request, res: Response, next: NextFunction) => {
     // Handle custom errors
-    if (error instanceof CustomError && error.name === 'CustomError') {
+    if (error instanceof Failure && error.name === 'Failure') {
         responseWithMessage(res, error.code, error.message);
         return;
     }
@@ -20,7 +20,7 @@ const errorHandler = (error: CustomError | Error, req: Request, res: Response, n
     }
 
     // Handle unexpected errors
-    logger.error(`[errorHandler] Middleware unexpected error: ${error}`);
+    logger.error(`[errorHandler] Unexpected error: ${error}`);
     responseWithMessage(res, StatusCodes.INTERNAL_SERVER_ERROR, 'Internal server error');
     next();
 };

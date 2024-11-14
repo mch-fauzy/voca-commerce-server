@@ -6,28 +6,28 @@ import {
     User,
     UserPrimaryId
 } from '../models/user-model';
-import { CustomError } from '../utils/custom-error';
+import { Failure } from '../utils/failure';
 
 class UserRepository {
-    static createUser = async (data: CreateUser) => {
+    static create = async (data: CreateUser) => {
         try {
             const primaryId: UserPrimaryId = {
                 id: data.id
             };
 
-            const isUserExistById = await this.isUserExistById(primaryId);
-            if (isUserExistById) throw CustomError.conflict(`User with this id already exists`);
+            const isUserAvailable = await this.existsById(primaryId);
+            if (isUserAvailable) throw Failure.conflict(`User with this id already exists`);
 
             await prisma.voca_user.create({ data: data });
-
-            return;
         } catch (error) {
-            logger.error(`[createUser] Repository error creating user: ${error}`);
-            throw CustomError.internalServer('Failed to create user');
+            if (error instanceof Failure) throw error;
+
+            logger.error(`[UserRepository.create] Error creating user: ${error}`);
+            throw Failure.internalServer('Failed to create user');
         }
     };
 
-    static getUsersByFilter = async (filter: Filter): Promise<[User[], number]> => {
+    static findManyAndCountByFilter = async (filter: Filter): Promise<[User[], number]> => {
         try {
             const { selectFields, filterFields, pagination, sorts } = filter;
 
@@ -68,12 +68,34 @@ class UserRepository {
 
             return [users, totalUsers];
         } catch (error) {
-            logger.error(`[getUsersByFilter] Repository error retrieving users by filter: ${error}`);
-            throw CustomError.internalServer('Failed to retrieve users by filter');
+            logger.error(`[UserRepository.findManyAndCountByFilter] Error finding and counting users by filter: ${error}`);
+            throw Failure.internalServer('Failed to find and count users by filter');
         }
     };
 
-    static isUserExistById = async (primaryId: UserPrimaryId) => {
+    static countByFilter = async (filter: Pick<Filter, 'filterFields'>) => {
+        try {
+            const { filterFields } = filter;
+
+            const where = filterFields
+                ? Object.fromEntries(
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }])
+                )
+                : undefined;
+
+            const totalUsers = await prisma.voca_user.count({
+                where
+            });
+
+            return totalUsers;
+        } catch (error) {
+            logger.error(`[UserRepository.countByFilter] Error counting users by filter: ${error}`);
+            throw Failure.internalServer('Failed to count users by filter');
+        }
+    }
+
+    // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
+    static existsById = async (primaryId: UserPrimaryId) => {
         try {
             const user = await prisma.voca_user.findUnique({
                 where: { id: primaryId.id },
@@ -82,8 +104,8 @@ class UserRepository {
 
             return user ? true : false;
         } catch (error) {
-            logger.error('[isUserExistById] Repository error checking user by id');
-            throw CustomError.internalServer('Failed to check user by id');
+            logger.error('[UserRepository.existsById] Error determining user by id');
+            throw Failure.internalServer('Failed to determine user by id');
         }
     };
 }

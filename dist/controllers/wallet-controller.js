@@ -14,32 +14,32 @@ exports.WalletController = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const constants_1 = require("../utils/constants");
 const wallet_service_1 = require("../services/wallet-service");
-const http_response_1 = require("../utils/http-response");
+const response_1 = require("../utils/response");
 class WalletController {
 }
 exports.WalletController = WalletController;
 _a = WalletController;
-WalletController.createOwnWallet = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+WalletController.createForCurrentUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const response = yield wallet_service_1.WalletService.createWalletByUserId({
+        const response = yield wallet_service_1.WalletService.createByUserId({
             userId,
             email
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);
     }
 });
-WalletController.getOwnBalanceFromWallet = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+WalletController.getBalanceForCurrentUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const response = yield wallet_service_1.WalletService.getBalanceFromWalletByUserId({
+        const response = yield wallet_service_1.WalletService.getBalanceByUserId({
             userId
         });
-        (0, http_response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
+        (0, response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);

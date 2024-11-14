@@ -15,7 +15,7 @@ const http_status_codes_1 = require("http-status-codes");
 const product_dto_1 = require("../models/dto/product-dto");
 const product_service_1 = require("../services/product-service");
 const constants_1 = require("../utils/constants");
-const http_response_1 = require("../utils/http-response");
+const response_1 = require("../utils/response");
 class ProductController {
 }
 exports.ProductController = ProductController;
@@ -32,7 +32,7 @@ ProductController.createProduct = (req, res, next) => __awaiter(void 0, void 0, 
             price: body.price,
             available: body.available,
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);
@@ -51,7 +51,7 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
             price: body.price,
             available: body.available
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -60,10 +60,12 @@ ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void
 ProductController.deleteProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
+        const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
         const response = yield product_service_1.ProductService.deleteProductById({
-            id: Number(id)
+            id: Number(id),
+            userId: userId
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -75,9 +77,9 @@ ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, 
         const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
         const response = yield product_service_1.ProductService.softDeleteProductById({
             id: Number(id),
-            email,
+            email: email
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -89,7 +91,7 @@ ProductController.restoreProductById = (req, res, next) => __awaiter(void 0, voi
         const response = yield product_service_1.ProductService.restoreProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
@@ -101,7 +103,7 @@ ProductController.getProductById = (req, res, next) => __awaiter(void 0, void 0,
         const response = yield product_service_1.ProductService.getProductById({
             id: Number(id)
         });
-        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
+        (0, response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);
@@ -118,7 +120,7 @@ ProductController.getProductsByFilter = (req, res, next) => __awaiter(void 0, vo
             page: (_c = query.page) !== null && _c !== void 0 ? _c : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGE, // if null or undefined then use default value
             pageSize: (_d = query.pageSize) !== null && _d !== void 0 ? _d : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGESIZE
         });
-        (0, http_response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
+        (0, response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);

@@ -14,18 +14,15 @@ exports.WalletService = void 0;
 const winston_1 = require("../configs/winston");
 const wallet_model_1 = require("../models/wallet-model");
 const wallet_repository_1 = require("../repositories/wallet-repository");
-const custom_error_1 = require("../utils/custom-error");
+const failure_1 = require("../utils/failure");
 // Wallet must associated with userId
 class WalletService {
 }
 exports.WalletService = WalletService;
 _a = WalletService;
-WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.createByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [_, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
-            selectFields: [
-                wallet_model_1.WALLET_DB_FIELD.userId
-            ],
+        const totalWallets = yield wallet_repository_1.WalletRepository.countByFilter({
             filterFields: [{
                     field: wallet_model_1.WALLET_DB_FIELD.userId,
                     operator: 'equals',
@@ -33,8 +30,8 @@ WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, 
                 }]
         });
         if (totalWallets !== 0)
-            throw custom_error_1.CustomError.conflict('User already has an existing wallet');
-        yield wallet_repository_1.WalletRepository.createWallet({
+            throw failure_1.Failure.conflict('User already has a wallet');
+        yield wallet_repository_1.WalletRepository.create({
             userId: req.userId,
             createdBy: req.email,
             updatedBy: req.email
@@ -42,15 +39,15 @@ WalletService.createWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, 
         return 'Success';
     }
     catch (error) {
-        if (error instanceof custom_error_1.CustomError)
+        if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[createWallet] Service error creating wallet: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to create wallet');
+        winston_1.logger.error(`[WalletService.createByUserId] Error creating wallet by user id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to create wallet by user id');
     }
 });
-WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.getBalanceByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.getWalletsByFilter({
+        const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.findManyAndCountByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.balance
             ],
@@ -61,28 +58,28 @@ WalletService.getBalanceFromWalletByUserId = (req) => __awaiter(void 0, void 0, 
                 }]
         });
         if (totalWallets === 0)
-            throw custom_error_1.CustomError.notFound('User does not have a wallet');
+            throw failure_1.Failure.notFound('User does not have a wallet');
         const response = {
             balance: wallets[0].balance
         };
         return response;
     }
     catch (error) {
-        if (error instanceof custom_error_1.CustomError)
+        if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[getBalanceFromWalletByUserId] Service error getting balance from wallet by user id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to get balance from wallet by user id');
+        winston_1.logger.error(`[WalletService.getBalanceByUserId] Error retrieving wallet balance by user id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to retrieve wallet balance by user id');
     }
 });
-WalletService.depositToWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.depositBalanceByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
     }
     catch (error) {
-        if (error instanceof custom_error_1.CustomError)
+        if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[depositToWalletByUserId] Service error deposit to wallet by user id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to deposit to wallet by user id');
+        winston_1.logger.error(`[WalletService.depositBalanceByUserId] Error depositing balance into wallet by user id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to deposit balance into wallet by user id');
     }
 });
-WalletService.withdrawFromWalletByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.withdrawBalanceByUserId = () => __awaiter(void 0, void 0, void 0, function* () {
 });

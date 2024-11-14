@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionRepository = void 0;
 const prisma_client_1 = require("../configs/prisma-client");
 const winston_1 = require("../configs/winston");
-const custom_error_1 = require("../utils/custom-error");
+const failure_1 = require("../utils/failure");
 class TransactionRepository {
 }
 exports.TransactionRepository = TransactionRepository;
@@ -25,6 +25,6 @@ TransactionRepository.createTransaction = (data) => __awaiter(void 0, void 0, vo
     }
     catch (error) {
         winston_1.logger.error(`[createTransaction] Repository error creating transaction: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to create transaction');
+        throw failure_1.Failure.internalServer('Failed to create transaction');
     }
 });

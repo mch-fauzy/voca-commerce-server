@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from '../utils/constants';
 import { TokenPayload } from '../models/dto/auth-dto';
-import { responseWithMessage } from '../utils/http-response';
+import { responseWithMessage } from '../utils/response';
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;

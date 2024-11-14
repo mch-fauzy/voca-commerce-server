@@ -7,7 +7,7 @@ import {
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from './constants';
 
-const generateToken = (req: Pick<TokenPayload, 'userId' | 'email' | 'role'>, type: string = 'Bearer'): LoginResponse => {
+const generateToken = (req: Pick<TokenPayload, 'userId' | 'email' | 'role'>): LoginResponse => {
     const expireTime = CONSTANTS.JWT.EXPIRY;
     const token = sign(
         {
@@ -20,7 +20,7 @@ const generateToken = (req: Pick<TokenPayload, 'userId' | 'email' | 'role'>, typ
 
     return {
         token: token,
-        tokenType: type,
+        createdAt: new Date().toISOString(),
         expiresIn: expireTime
     };
 };

@@ -13,40 +13,38 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.WalletRepository = void 0;
 const prisma_client_1 = require("../configs/prisma-client");
 const winston_1 = require("../configs/winston");
-const custom_error_1 = require("../utils/custom-error");
+const failure_1 = require("../utils/failure");
 class WalletRepository {
 }
 exports.WalletRepository = WalletRepository;
 _a = WalletRepository;
-WalletRepository.createWallet = (data) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.create = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield prisma_client_1.prisma.voca_wallet.create({ data: data });
-        return;
     }
     catch (error) {
-        winston_1.logger.error(`[createWallet] Repository error creating wallet: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to create wallet');
+        winston_1.logger.error(`[WalletRepository.create] Error creating wallet: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to create wallet');
     }
 });
-WalletRepository.updateWalletById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.updateById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isWalletExistById = yield _a.isWalletExistById(primaryId);
-        if (!isWalletExistById)
-            throw custom_error_1.CustomError.notFound(`Wallet not found`);
+        const isWalletAvailable = yield _a.existsById(primaryId);
+        if (!isWalletAvailable)
+            throw failure_1.Failure.notFound(`Wallet not found`);
         yield prisma_client_1.prisma.voca_wallet.update({
             where: { id: primaryId.id },
             data: data
         });
-        return;
     }
     catch (error) {
-        if (error instanceof custom_error_1.CustomError)
+        if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[updateWalletById] Repository error updating wallet by id: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to update wallet by id');
+        winston_1.logger.error(`[WalletRepository.updateById] Error updating wallet by id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to update wallet by id');
     }
 });
-WalletRepository.getWalletsByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields, filterFields, pagination, sorts } = filter;
         // Handle select specific field (output: create a single object from array of array)
@@ -79,11 +77,28 @@ WalletRepository.getWalletsByFilter = (filter) => __awaiter(void 0, void 0, void
         return [wallets, totalWallets];
     }
     catch (error) {
-        winston_1.logger.error(`[getWalletsByFilter] Repository error retrieving wallets by filter: ${error}`);
-        throw custom_error_1.CustomError.internalServer('Failed to retrieve wallets by filter');
+        winston_1.logger.error(`[WalletRepository.findManyAndCountByFilter] Error finding and counting wallets by filter: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to find and count wallets by filter');
     }
 });
-WalletRepository.isWalletExistById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.countByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { filterFields } = filter;
+        const where = filterFields
+            ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]))
+            : undefined;
+        const totalWallets = yield prisma_client_1.prisma.voca_wallet.count({
+            where
+        });
+        return totalWallets;
+    }
+    catch (error) {
+        winston_1.logger.error(`[WalletRepository.countByFilter] Error counting wallets by filter: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to count wallets by filter');
+    }
+});
+// Exists is a verb, if you want to use "is", please use isAvailable or isPresent
+WalletRepository.existsById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield prisma_client_1.prisma.voca_wallet.findUnique({
             where: { id: primaryId.id },
@@ -92,7 +107,7 @@ WalletRepository.isWalletExistById = (primaryId) => __awaiter(void 0, void 0, vo
         return product ? true : false;
     }
     catch (error) {
-        winston_1.logger.error('[isWalletExistById] Repository error checking wallet by id');
-        throw custom_error_1.CustomError.internalServer('Failed to check wallet by id');
+        winston_1.logger.error('[WalletRepository.existsById] Error determining wallet by id');
+        throw failure_1.Failure.internalServer('Failed to determine wallet by id');
     }
 });

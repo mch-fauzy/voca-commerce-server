@@ -21,7 +21,7 @@ interface LoginRequest {
 
 interface LoginResponse {
     token: string;
-    tokenType: string;
+    createdAt: string;
     expiresIn: number;
 }
 

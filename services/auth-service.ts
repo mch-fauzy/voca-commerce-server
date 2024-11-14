@@ -11,28 +11,25 @@ import {
     hashPassword
 } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { CustomError } from '../utils/custom-error';
+import { Failure } from '../utils/failure';
 import { logger } from '../configs/winston';
 import { USER_DB_FIELD } from '../models/user-model';
 
 class AuthService {
     static register = async (req: RegisterRequest) => {
         try {
-            const [_, totalUsers] = await UserRepository.getUsersByFilter({
-                selectFields: [
-                    USER_DB_FIELD.email
-                ],
+            const totalUsers = await UserRepository.countByFilter({
                 filterFields: [{
                     field: USER_DB_FIELD.email,
                     operator: 'equals',
                     value: req.email
                 }]
             });
-            if (totalUsers !== 0) throw CustomError.conflict('Account with this email already exists');
+            if (totalUsers !== 0) throw Failure.conflict('User with this email already exists');
 
             const userId = uuidv4();
             const hashedPassword = await hashPassword(req.password);
-            await UserRepository.createUser({
+            await UserRepository.create({
                 email: req.email,
                 role: req.role,
                 id: userId,
@@ -43,16 +40,16 @@ class AuthService {
 
             return 'Success';
         } catch (error) {
-            if (error instanceof CustomError) throw error;
+            if (error instanceof Failure) throw error;
 
-            logger.error(`[register] Service error registering user: ${error}`);
-            throw CustomError.internalServer('Failed to register user');
+            logger.error(`[AuthService.register] Error registering user: ${error}`);
+            throw Failure.internalServer('Failed to register user');
         }
     };
 
     static login = async (req: LoginRequest): Promise<LoginResponse> => {
         try {
-            const [users, totalUsers] = await UserRepository.getUsersByFilter({
+            const [users, totalUsers] = await UserRepository.findManyAndCountByFilter({
                 selectFields: [
                     USER_DB_FIELD.id,
                     USER_DB_FIELD.email,
@@ -65,10 +62,10 @@ class AuthService {
                     value: req.email
                 }]
             });
-            if (totalUsers === 0) throw CustomError.unauthorized('Invalid credentials');
+            if (totalUsers === 0) throw Failure.unauthorized('Invalid credentials');
 
             const isValidPassword = await comparePassword(req.password, users[0].password);
-            if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
+            if (!isValidPassword) throw Failure.unauthorized('Invalid credentials');
 
             const response = generateToken({
                 userId: users[0].id,
@@ -78,10 +75,10 @@ class AuthService {
 
             return response;
         } catch (error) {
-            if (error instanceof CustomError) throw error;
+            if (error instanceof Failure) throw error;
 
-            logger.error(`[login] Service error login user: ${error}`);
-            throw CustomError.internalServer('Failed to login user');
+            logger.error(`[AuthService.login] Error login user: ${error}`);
+            throw Failure.internalServer('Failed to login user');
         }
     };
 }

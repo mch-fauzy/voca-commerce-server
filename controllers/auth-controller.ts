@@ -11,7 +11,7 @@ import { CONSTANTS } from '../utils/constants';
 import {
     responseWithData,
     responseWithMessage
-} from '../utils/http-response';
+} from '../utils/response';
 
 class AuthController {
     static registerUser = async (req: Request, res: Response, next: NextFunction) => {
