@@ -5,27 +5,34 @@ import {
 } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { ProductValidator } from '../models/dto/product-dto';
+import {
+    ProductCreateRequest,
+    ProductUpdateByIdRequest,
+    ProductGetListByFilterRequest,
+    ProductValidator,
+    ProductDeleteByIdRequest,
+    ProductSoftDeleteByIdRequest,
+    ProductGetByIdRequest
+} from '../models/dto/product-dto';
 import { ProductService } from '../services/product-service';
 import { CONSTANTS } from '../utils/constants';
 import {
     responseWithMessage,
     responseWithMetadata
-} from '../utils/http-response';
+} from '../utils/response';
 
 class ProductController {
-    static createProduct = async (req: Request, res: Response, next: NextFunction) => {
+    static create = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            const body = await ProductValidator.validateCreateProductBody(req.body);
-            // Assign object explicitly to enforce strict type (Excess Property Checks)
-            const response = await ProductService.createProduct({
-                email,
-                name: body.name,
-                description: body.description,
-                price: body.price,
-                available: body.available,
-            });
+            const request: ProductCreateRequest = {
+                name: req.body.name,
+                description: req.body.description,
+                price: req.body.price,
+                available: req.body.available,
+                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+            };
+            const validatedRequest = await ProductValidator.validateCreate(request);
+            const response = await ProductService.create(validatedRequest);
 
             responseWithMessage(res, StatusCodes.CREATED, response);
         } catch (error) {
@@ -33,19 +40,18 @@ class ProductController {
         }
     };
 
-    static updateProductById = async (req: Request, res: Response, next: NextFunction) => {
+    static updateById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            const body = await ProductValidator.validateUpdateProductBody(req.body);
-            const response = await ProductService.updateProductById({
-                id: Number(id),
-                email,
-                name: body.name,
-                description: body.description,
-                price: body.price,
-                available: body.available
-            });
+            const request: ProductUpdateByIdRequest = {
+                name: req.body.name,
+                description: req.body.description,
+                price: req.body.price,
+                available: req.body.available,
+                id: Number(req.params.id),
+                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+            };
+            const validatedRequest = await ProductValidator.validateUpdateById(request);
+            const response = await ProductService.updateById(validatedRequest);
 
             responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
@@ -53,12 +59,14 @@ class ProductController {
         }
     };
 
-    static deleteProductById = async (req: Request, res: Response, next: NextFunction) => {
+    static deleteById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const response = await ProductService.deleteProductById({
-                id: Number(id)
-            });
+            const request: ProductDeleteByIdRequest = {
+                id: Number(req.params.id),
+                userId: String(req.headers[CONSTANTS.HEADERS.USERID])
+            };
+            const validatedRequest = await ProductValidator.validateDeleteById(request);
+            const response = await ProductService.deleteById(validatedRequest);
 
             responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
@@ -66,14 +74,14 @@ class ProductController {
         }
     };
 
-    static softDeleteProductById = async (req: Request, res: Response, next: NextFunction) => {
+    static softDeleteById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const email = String(req.headers[CONSTANTS.HEADERS.EMAIL]);
-            const response = await ProductService.softDeleteProductById({
-                id: Number(id),
-                email,
-            });
+            const request: ProductSoftDeleteByIdRequest = {
+                id: Number(req.params.id),
+                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+            };
+            const validatedRequest = await ProductValidator.validateSoftDeleteById(request);
+            const response = await ProductService.softDeleteById(validatedRequest);
 
             responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
@@ -81,12 +89,13 @@ class ProductController {
         }
     };
 
-    static restoreProductById = async (req: Request, res: Response, next: NextFunction) => {
+    static restoreById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const response = await ProductService.restoreProductById({
-                id: Number(id)
-            });
+            const request: Pick<ProductSoftDeleteByIdRequest, 'id'> = {
+                id: Number(req.params.id)
+            };
+            const validatedRequest = await ProductValidator.validateRestoreById(request);
+            const response = await ProductService.restoreById(validatedRequest);
 
             responseWithMessage(res, StatusCodes.OK, response);
         } catch (error) {
@@ -94,12 +103,13 @@ class ProductController {
         }
     };
 
-    static getProductById = async (req: Request, res: Response, next: NextFunction) => {
+    static getById = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { id } = req.params;
-            const response = await ProductService.getProductById({
-                id: Number(id)
-            });
+            const request: ProductGetByIdRequest = {
+                id: Number(req.params.id)
+            };
+            const validatedRequest = await ProductValidator.validateGetById(request);
+            const response = await ProductService.getById(validatedRequest);
 
             responseWithMetadata(res, StatusCodes.OK, response.data, response.metadata);
         } catch (error) {
@@ -107,16 +117,17 @@ class ProductController {
         }
     };
 
-    static getProductsByFilter = async (req: Request, res: Response, next: NextFunction) => {
+    static getListByFilter = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = await ProductValidator.validateGetProductsByFilterQuery(req.query);
-            const response = await ProductService.getProductsByFilter({
-                name: query.name,
-                sort: query.sort,
-                order: query.order ?? 'desc',
-                page: query.page ?? CONSTANTS.PAGINATION.DEFAULT_PAGE, // if null or undefined then use default value
-                pageSize: query.pageSize ?? CONSTANTS.PAGINATION.DEFAULT_PAGESIZE
-            });
+            const request: ProductGetListByFilterRequest = {
+                page: req.query.page ? Number(req.query.page) : CONSTANTS.QUERY.DEFAULT_PAGE,
+                pageSize: req.query.page_size ? Number(req.query.page_size) : CONSTANTS.QUERY.DEFAULT_PAGESIZE,
+                sort: req.query.sort ? String(req.query.sort) : undefined,
+                order: req.query.order ? String(req.query.order) : CONSTANTS.QUERY.DEFAULT_ORDER,
+                name: req.query.name ? String(req.query.name) : undefined
+            };
+            const validatedRequest = await ProductValidator.validateGetListByFilter(request);
+            const response = await ProductService.getListByFilter(validatedRequest);
 
             responseWithMetadata(res, StatusCodes.OK, response.data, response.metadata);
         } catch (error) {

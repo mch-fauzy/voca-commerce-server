@@ -4,7 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from '../utils/constants';
-import { TokenPayload } from '../models/dto/auth-dto';
+import { AuthTokenPayload } from '../models/dto/auth-dto';
 import { responseWithMessage } from '../utils/response';
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +21,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
             return;
         }
 
-        const decodedTokenPayload = decodedToken as TokenPayload;
+        const decodedTokenPayload = decodedToken as AuthTokenPayload;
 
         // Check if userId, email, and role are present
         if (!decodedTokenPayload.userId || !decodedTokenPayload.email || !decodedTokenPayload.role) {

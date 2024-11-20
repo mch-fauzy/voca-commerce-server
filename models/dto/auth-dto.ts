@@ -3,29 +3,24 @@ import { JwtPayload } from "jsonwebtoken";
 
 import { Role } from "../user-model";
 
-interface AuthBody {
+interface AuthRequestBody {
     email: string;
     password: string;
 }
 
-interface RegisterRequest {
-    email: string;
-    password: string;
+interface AuthRegisterRequest extends AuthRequestBody {
     role: Role;
 }
 
-interface LoginRequest {
-    email: string;
-    password: string;
-}
+interface AuthLoginRequest extends AuthRequestBody { }
 
-interface LoginResponse {
+interface AuthLoginResponse {
     token: string;
     createdAt: string;
     expiresIn: number;
 }
 
-interface TokenPayload extends JwtPayload {
+interface AuthTokenPayload extends JwtPayload {
     userId: string;
     email: string;
     role: Role;
@@ -33,30 +28,31 @@ interface TokenPayload extends JwtPayload {
 
 class AuthValidator {
     // Register section
-    private static registerBodyValidator = Joi.object({
+    private static registerRequestValidator = Joi.object({
         email: Joi.string().email().required(),
-        password: Joi.string().min(6).required()
+        password: Joi.string().min(6).required(),
+        role: Joi.string().valid(Role).required()
     });
 
-    static validateRegisterBody = async (body: AuthBody): Promise<AuthBody> => {
-        return await this.registerBodyValidator.validateAsync(body);
+    static validateRegister = async (req: AuthRegisterRequest): Promise<AuthRegisterRequest> => {
+        return await this.registerRequestValidator.validateAsync(req);
     };
 
     // Login section
-    private static loginBodyValidator = Joi.object({
+    private static loginRequestValidator = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().required()
     });
 
-    static validateLoginBody = async (body: AuthBody): Promise<AuthBody> => {
-        return await this.loginBodyValidator.validateAsync(body);
+    static validateLogin = async (req: AuthLoginRequest): Promise<AuthLoginRequest> => {
+        return await this.loginRequestValidator.validateAsync(req);
     };
 }
 
 export {
-    RegisterRequest,
-    LoginRequest,
-    TokenPayload,
-    LoginResponse,
+    AuthRegisterRequest,
+    AuthLoginRequest,
+    AuthTokenPayload,
+    AuthLoginResponse,
     AuthValidator
 };

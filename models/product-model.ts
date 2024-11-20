@@ -1,3 +1,4 @@
+// Read-only properties
 const PRODUCT_DB_FIELD = {
     id: 'id',
     name: 'name',
@@ -10,32 +11,34 @@ const PRODUCT_DB_FIELD = {
     updatedBy: 'updatedBy',
     deletedAt: 'deletedAt',
     deletedBy: 'deletedBy'
-}
+} as const
 
-interface CreateProduct {
+interface Product {
+    id: number;
     name: string;
     description: string | null;
     price: number;
     available: boolean;
+    createdAt: Date;
     createdBy: string;
+    updatedAt: Date;
     updatedBy: string;
-}
-
-interface UpdateProduct {
-    name: string;
-    description: string | null;
-    price: number;
-    available: boolean;
-    updatedBy: string;
-}
-
-interface SoftDeleteProduct {
     deletedAt: Date | null;
     deletedBy: string | null;
 }
 
+type ProductPrimaryId = Pick<Product, 'id'>;
+
+type CreateProduct = Pick<Product, 'name' | 'description' | 'price' | 'available' | 'createdBy' | 'updatedBy'>;
+
+type UpdateProduct = Pick<Product, 'name' | 'description' | 'price' | 'available' | 'updatedBy'>;
+
+type SoftDeleteProduct = Pick<Product, 'deletedAt' | 'deletedBy'>;
+
 export {
     PRODUCT_DB_FIELD,
+    Product,
+    ProductPrimaryId,
     CreateProduct,
     UpdateProduct,
     SoftDeleteProduct

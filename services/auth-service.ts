@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { UserRepository } from '../repositories/user-repository';
 import {
-    RegisterRequest,
-    LoginRequest,
-    LoginResponse
+    AuthRegisterRequest,
+    AuthLoginRequest,
+    AuthLoginResponse
 } from '../models/dto/auth-dto';
 import {
     comparePassword,
@@ -16,7 +16,7 @@ import { logger } from '../configs/winston';
 import { USER_DB_FIELD } from '../models/user-model';
 
 class AuthService {
-    static register = async (req: RegisterRequest) => {
+    static register = async (req: AuthRegisterRequest) => {
         try {
             const totalUsers = await UserRepository.countByFilter({
                 filterFields: [{
@@ -47,7 +47,7 @@ class AuthService {
         }
     };
 
-    static login = async (req: LoginRequest): Promise<LoginResponse> => {
+    static login = async (req: AuthLoginRequest): Promise<AuthLoginResponse> => {
         try {
             const [users, totalUsers] = await UserRepository.findManyAndCountByFilter({
                 selectFields: [
