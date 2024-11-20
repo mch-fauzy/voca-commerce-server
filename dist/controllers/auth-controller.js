@@ -22,12 +22,13 @@ exports.AuthController = AuthController;
 _a = AuthController;
 AuthController.registerUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateRegisterBody(req.body);
-        const response = yield auth_service_1.AuthService.register({
-            email: body.email,
-            password: body.password,
-            role: constants_1.CONSTANTS.ROLES.USER,
-        });
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+            role: constants_1.CONSTANTS.ROLES.USER
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateRegister(request);
+        const response = yield auth_service_1.AuthService.register(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
@@ -37,12 +38,13 @@ AuthController.registerUser = (req, res, next) => __awaiter(void 0, void 0, void
 });
 AuthController.registerAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateRegisterBody(req.body);
-        const response = yield auth_service_1.AuthService.register({
-            email: body.email,
-            password: body.password,
-            role: constants_1.CONSTANTS.ROLES.ADMIN,
-        });
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+            role: constants_1.CONSTANTS.ROLES.ADMIN
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateRegister(request);
+        const response = yield auth_service_1.AuthService.register(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
@@ -51,11 +53,12 @@ AuthController.registerAdmin = (req, res, next) => __awaiter(void 0, void 0, voi
 });
 AuthController.login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateLoginBody(req.body);
-        const response = yield auth_service_1.AuthService.login({
-            email: body.email,
-            password: body.password
-        });
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateLogin(request);
+        const response = yield auth_service_1.AuthService.login(validatedRequest);
         (0, response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {

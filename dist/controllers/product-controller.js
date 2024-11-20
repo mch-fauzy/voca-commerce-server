@@ -20,106 +20,106 @@ class ProductController {
 }
 exports.ProductController = ProductController;
 _a = ProductController;
-ProductController.createProduct = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.create = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const body = yield product_dto_1.ProductValidator.validateCreateProductBody(req.body);
-        // Assign object explicitly to enforce strict type (Excess Property Checks)
-        const response = yield product_service_1.ProductService.createProduct({
-            email,
-            name: body.name,
-            description: body.description,
-            price: body.price,
-            available: body.available,
-        });
+        const request = {
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            available: req.body.available,
+            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateCreate(request);
+        const response = yield product_service_1.ProductService.create(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.updateProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.updateById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const body = yield product_dto_1.ProductValidator.validateUpdateProductBody(req.body);
-        const response = yield product_service_1.ProductService.updateProductById({
-            id: Number(id),
-            email,
-            name: body.name,
-            description: body.description,
-            price: body.price,
-            available: body.available
-        });
+        const request = {
+            name: req.body.name,
+            description: req.body.description,
+            price: req.body.price,
+            available: req.body.available,
+            id: Number(req.params.id),
+            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateUpdateById(request);
+        const response = yield product_service_1.ProductService.updateById(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.deleteProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.deleteById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const response = yield product_service_1.ProductService.deleteProductById({
-            id: Number(id),
-            userId: userId
-        });
+        const request = {
+            id: Number(req.params.id),
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID])
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateDeleteById(request);
+        const response = yield product_service_1.ProductService.deleteById(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.softDeleteProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.softDeleteById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const response = yield product_service_1.ProductService.softDeleteProductById({
-            id: Number(id),
-            email: email
-        });
+        const request = {
+            id: Number(req.params.id),
+            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateSoftDeleteById(request);
+        const response = yield product_service_1.ProductService.softDeleteById(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.restoreProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.restoreById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const response = yield product_service_1.ProductService.restoreProductById({
-            id: Number(id)
-        });
+        const request = {
+            id: Number(req.params.id)
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateRestoreById(request);
+        const response = yield product_service_1.ProductService.restoreById(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.getProductById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+ProductController.getById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { id } = req.params;
-        const response = yield product_service_1.ProductService.getProductById({
-            id: Number(id)
-        });
+        const request = {
+            id: Number(req.params.id)
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateGetById(request);
+        const response = yield product_service_1.ProductService.getById(validatedRequest);
         (0, response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);
     }
 });
-ProductController.getProductsByFilter = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c, _d;
+ProductController.getListByFilter = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const query = yield product_dto_1.ProductValidator.validateGetProductsByFilterQuery(req.query);
-        const response = yield product_service_1.ProductService.getProductsByFilter({
-            name: query.name,
-            sort: query.sort,
-            order: (_b = query.order) !== null && _b !== void 0 ? _b : 'desc',
-            page: (_c = query.page) !== null && _c !== void 0 ? _c : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGE, // if null or undefined then use default value
-            pageSize: (_d = query.pageSize) !== null && _d !== void 0 ? _d : constants_1.CONSTANTS.PAGINATION.DEFAULT_PAGESIZE
-        });
+        const request = {
+            page: req.query.page ? Number(req.query.page) : constants_1.CONSTANTS.QUERY.DEFAULT_PAGE,
+            pageSize: req.query.page_size ? Number(req.query.page_size) : constants_1.CONSTANTS.QUERY.DEFAULT_PAGESIZE,
+            sort: req.query.sort ? String(req.query.sort) : undefined,
+            order: req.query.order ? String(req.query.order) : constants_1.CONSTANTS.QUERY.DEFAULT_ORDER,
+            name: req.query.name ? String(req.query.name) : undefined
+        };
+        const validatedRequest = yield product_dto_1.ProductValidator.validateGetListByFilter(request);
+        const response = yield product_service_1.ProductService.getListByFilter(validatedRequest);
         (0, response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {

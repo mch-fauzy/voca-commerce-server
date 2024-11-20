@@ -18,67 +18,74 @@ class ProductRepository {
 }
 exports.ProductRepository = ProductRepository;
 _a = ProductRepository;
-ProductRepository.insertProduct = (data) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.create = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield prisma_client_1.prisma.voca_product.create({ data: data });
     }
     catch (error) {
-        winston_1.logger.error(`[insertProduct] Repository error creating product: ${error}`);
+        winston_1.logger.error(`[ProductRepository.create] Error creating product: ${error}`);
         throw failure_1.Failure.internalServer('Failed to create product');
     }
 });
-ProductRepository.updateProductById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.updateById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const isProductAvailable = yield _a.existById(primaryId);
+        if (!isProductAvailable)
+            throw failure_1.Failure.notFound(`Product not found`);
         yield prisma_client_1.prisma.voca_product.update({
-            where: { id: id },
+            where: { id: primaryId.id },
             data: data
         });
     }
     catch (error) {
-        winston_1.logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
+        if (error instanceof failure_1.Failure)
+            throw error;
+        winston_1.logger.error(`[ProductRepository.updateById] Error updating product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to update product by id');
     }
 });
-ProductRepository.deleteProductById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.deleteById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield prisma_client_1.prisma.voca_product.delete({ where: { id: id } });
+        const isProductAvailable = yield _a.existById(primaryId);
+        if (!isProductAvailable)
+            throw failure_1.Failure.notFound(`Product not found`);
+        yield prisma_client_1.prisma.voca_product.delete({ where: { id: primaryId.id } });
     }
     catch (error) {
-        winston_1.logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
+        if (error instanceof failure_1.Failure)
+            throw error;
+        winston_1.logger.error(`[ProductRepository.deleteById] Error deleting product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to delete product by id');
     }
 });
-ProductRepository.findProductById = (id, fields) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.findById = (primaryId, fields) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields } = fields !== null && fields !== void 0 ? fields : {};
-        const isProductExistById = yield _a.isProductExistById(id);
-        if (!isProductExistById)
-            throw failure_1.Failure.notFound(`Product not found`);
         // Handle select specific field (output: create a single object from array of array)
         const select = selectFields
             ? Object.fromEntries(selectFields.map((field) => [field, true]) // array of array
             )
             : undefined;
         const product = yield prisma_client_1.prisma.voca_product.findUnique({
-            where: { id: id },
+            where: { id: primaryId.id },
             select
         });
+        if (!product)
+            throw failure_1.Failure.notFound(`Product not found`);
         return product;
     }
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to retrieve product by id');
+        winston_1.logger.error(`[ProductRepository.findById] Error finding product by id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to find product by id');
     }
 });
-ProductRepository.findProductsByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields, filterFields, pagination, sorts } = filter;
-        // Handle select specific field (output: create a single object from array of array)
         const select = selectFields
-            ? Object.fromEntries(selectFields.map((field) => [field, true]) // array of array
-            )
+            ? Object.fromEntries(selectFields.map((field) => [field, true]))
             : undefined;
         // Handle filter field (output: create a single object from array of array)
         const where = filterFields
@@ -102,27 +109,24 @@ ProductRepository.findProductsByFilter = (filter) => __awaiter(void 0, void 0, v
                 where
             })
         ]);
-        return {
-            data: products,
-            count: totalProducts
-        };
+        return [products, totalProducts];
     }
     catch (error) {
-        winston_1.logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to retrieve products by filter');
+        winston_1.logger.error(`[ProductRepository.findManyAndCountByFilter] Error finding and counting products by filter: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to find and count products by filter');
     }
 });
 // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
-ProductRepository.isProductExistById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.existById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield prisma_client_1.prisma.voca_product.findUnique({
-            where: { id: id },
+            where: { id: primaryId.id },
             select: { id: true }
         });
         return product ? true : false;
     }
     catch (error) {
-        winston_1.logger.error('[isProductExistById] Repository error checking product by id');
-        throw failure_1.Failure.internalServer('Failed to check product by id');
+        winston_1.logger.error('[ProductRepository.existById] Error determining product by id');
+        throw failure_1.Failure.internalServer('Failed to determine product by id');
     }
 });

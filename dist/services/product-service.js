@@ -23,10 +23,10 @@ class ProductService {
 }
 exports.ProductService = ProductService;
 _a = ProductService;
-ProductService.createProduct = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.create = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield Promise.all([
-            product_repository_1.ProductRepository.insertProduct({
+            product_repository_1.ProductRepository.create({
                 name: req.name,
                 description: req.description,
                 price: req.price,
@@ -40,15 +40,19 @@ ProductService.createProduct = (req) => __awaiter(void 0, void 0, void 0, functi
         return 'Success';
     }
     catch (error) {
-        winston_1.logger.error(`[createProduct] Service error creating product: ${error}`);
+        winston_1.logger.error(`[ProductService.create] Error creating product: ${error}`);
         throw failure_1.Failure.internalServer('Failed to create product');
     }
 });
-ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.updateById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield product_repository_1.ProductRepository.findProductById(req.id);
-        if (!product)
-            throw failure_1.Failure.notFound('Product not found');
+        const primaryId = { id: req.id };
+        const product = yield product_repository_1.ProductRepository.findById(primaryId, {
+            selectFields: [
+                product_model_1.PRODUCT_DB_FIELD.deletedAt,
+                product_model_1.PRODUCT_DB_FIELD.deletedBy
+            ]
+        });
         // Prevent updating if product is marked as deleted, unless it's being restored
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
@@ -64,11 +68,11 @@ ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, fu
             updatedBy: req.email
         }
 
-        await ProductRepository.updateProductById(req.id, request);
+        await ProductRepository.updateById(primaryId, request);
         */
         yield Promise.all([
             // Assign object explicitly to enforce strict type (Excess Property Checks), because excess property will updated in db
-            product_repository_1.ProductRepository.updateProductById(req.id, {
+            product_repository_1.ProductRepository.updateById(primaryId, {
                 name: req.name,
                 description: req.description,
                 price: req.price,
@@ -83,20 +87,24 @@ ProductService.updateProductById = (req) => __awaiter(void 0, void 0, void 0, fu
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[updateProductById] Service error updating product by id: ${error}`);
+        winston_1.logger.error(`[ProductService.updateById] Error updating product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to update product by id');
     }
 });
-ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.softDeleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield product_repository_1.ProductRepository.findProductById(req.id);
-        if (!product)
-            throw failure_1.Failure.notFound('Product not found');
+        const primaryId = { id: req.id };
+        const product = yield product_repository_1.ProductRepository.findById(primaryId, {
+            selectFields: [
+                product_model_1.PRODUCT_DB_FIELD.deletedAt,
+                product_model_1.PRODUCT_DB_FIELD.deletedBy
+            ]
+        });
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (isProductMarkedAsDeleted)
             throw failure_1.Failure.conflict('Product already marked as deleted');
         yield Promise.all([
-            product_repository_1.ProductRepository.updateProductById(req.id, {
+            product_repository_1.ProductRepository.updateById(primaryId, {
                 deletedAt: new Date(),
                 deletedBy: req.email
             }),
@@ -108,21 +116,25 @@ ProductService.softDeleteProductById = (req) => __awaiter(void 0, void 0, void 0
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[softDeleteProductById] Service error soft deleting product by id: ${error}`);
+        winston_1.logger.error(`[ProductService.softDeleteById] Error soft deleting product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to soft delete product by id');
     }
 });
-ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.restoreById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield product_repository_1.ProductRepository.findProductById(req.id);
-        if (!product)
-            throw failure_1.Failure.notFound('Product not found');
+        const primaryId = { id: req.id };
+        const product = yield product_repository_1.ProductRepository.findById(primaryId, {
+            selectFields: [
+                product_model_1.PRODUCT_DB_FIELD.deletedAt,
+                product_model_1.PRODUCT_DB_FIELD.deletedBy
+            ]
+        });
         // Prevent restore if product not marked as deleted
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
             throw failure_1.Failure.conflict('Product not marked as deleted and cannot be restored');
         yield Promise.all([
-            product_repository_1.ProductRepository.updateProductById(req.id, {
+            product_repository_1.ProductRepository.updateById(primaryId, {
                 deletedAt: null,
                 deletedBy: null
             }),
@@ -134,51 +146,51 @@ ProductService.restoreProductById = (req) => __awaiter(void 0, void 0, void 0, f
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[restoreProductById] Service error restoring product by id: ${error}`);
+        winston_1.logger.error(`[ProductService.restoreById] Error restoring product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to restore product by id');
     }
 });
-ProductService.deleteProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.deleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield product_repository_1.ProductRepository.findProductById(req.id);
-        if (!product)
-            throw failure_1.Failure.notFound('Product not found');
-        // Additional security to reduce accident caused by deletion
+        const primaryId = { id: req.id };
+        const product = yield product_repository_1.ProductRepository.findById(primaryId, {
+            selectFields: [
+                product_model_1.PRODUCT_DB_FIELD.deletedAt,
+                product_model_1.PRODUCT_DB_FIELD.deletedBy
+            ]
+        });
         const isProductMarkedAsDeleted = Boolean(product.deletedAt || product.deletedBy);
         if (!isProductMarkedAsDeleted)
             throw failure_1.Failure.forbidden('Product not marked as deleted');
         // Operations are independent of each other, run concurrently
         yield Promise.all([
-            product_repository_1.ProductRepository.deleteProductById(req.id),
+            product_repository_1.ProductRepository.deleteById(primaryId),
             redis_cache_1.RedisUtils.deleteCacheByKey(`${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`),
             redis_cache_1.RedisUtils.deleteCacheFromSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY),
         ]);
-        winston_1.logger.warn(`[deleteProductById] Account with ${req.userId} performed a delete action on product with id ${req.id}`);
+        winston_1.logger.warn(`[ProductService.deleteById] User with id ${req.userId} performed a delete action on product with id ${req.id}`);
         return 'Success';
     }
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[deleteProductById] Service error deleting product by id: ${error}`);
+        winston_1.logger.error(`[ProductService.deleteById] Error deleting product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to delete product by id');
     }
 });
-ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.getById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Get cache
         const productKey = `${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`; // Get unique key based on id
         const productCache = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
         if (productCache) {
-            if (productCache) {
-                const productCacheResponse = JSON.parse(productCache); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
-                productCacheResponse.metadata.isFromCache = true;
-                return productCacheResponse;
-            }
-            ;
+            const response = JSON.parse(productCache); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
+            response.metadata.isFromCache = true;
+            return response;
         }
-        const product = yield product_repository_1.ProductRepository.findProductById(req.id);
-        if (!product)
-            throw failure_1.Failure.notFound('Product not found');
+        ;
+        const primaryId = { id: req.id };
+        const product = yield product_repository_1.ProductRepository.findById(primaryId);
         const response = {
             data: product,
             metadata: {
@@ -192,21 +204,22 @@ ProductService.getProductById = (req) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[getProductById] Service error retrieving product by id: ${error}`);
+        winston_1.logger.error(`[ProductService.getById] Error retrieving product by id: ${error}`);
         throw failure_1.Failure.internalServer('Failed to retrieve product by id');
     }
 });
-ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, function* () {
+ProductService.getListByFilter = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c;
     try {
         const productKey = redis_cache_1.RedisUtils.generateHashedCacheKey(constants_1.CONSTANTS.REDIS.PRODUCT_KEY, req);
-        const productsCache = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
-        if (productsCache) {
-            const productsCacheResponse = JSON.parse(productsCache);
-            productsCacheResponse.metadata.isFromCache = true;
-            return productsCacheResponse;
+        const productCache = yield redis_cache_1.RedisUtils.getCacheByKey(productKey);
+        if (productCache) {
+            const response = JSON.parse(productCache);
+            response.metadata.isFromCache = true;
+            return response;
         }
         // Can assign sorts and filterFields more than 1
-        const products = yield product_repository_1.ProductRepository.findProductsByFilter({
+        const filter = {
             selectFields: [
                 product_model_1.PRODUCT_DB_FIELD.id,
                 product_model_1.PRODUCT_DB_FIELD.name,
@@ -216,30 +229,35 @@ ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, 
                 product_model_1.PRODUCT_DB_FIELD.createdAt,
                 product_model_1.PRODUCT_DB_FIELD.updatedAt
             ],
-            filterFields: [
-                {
+            filterFields: [{
                     field: product_model_1.PRODUCT_DB_FIELD.deletedAt,
                     operator: 'equals',
-                    value: null
-                },
-                {
-                    field: product_model_1.PRODUCT_DB_FIELD.name,
-                    operator: 'contains', // Case-sensitive
-                    value: req.name
-                }
-            ],
+                    value: null,
+                }],
             pagination: {
                 page: req.page,
                 pageSize: req.pageSize
             },
-            sorts: [{
-                    field: req.sort,
-                    order: req.order
-                }]
-        });
-        const pagination = (0, calculate_pagination_1.calculatePaginationMetadata)(products.count, req.page, req.pageSize);
+        };
+        if (req.name !== undefined) {
+            filter.filterFields = (_b = filter.filterFields) !== null && _b !== void 0 ? _b : []; // Ensure `filter.filterFields` is initialized
+            filter.filterFields.push({
+                field: product_model_1.PRODUCT_DB_FIELD.name,
+                operator: 'contains',
+                value: req.name,
+            });
+        }
+        if (req.sort !== undefined) {
+            filter.sorts = (_c = filter.sorts) !== null && _c !== void 0 ? _c : []; // Ensure `filter.sorts` is initialized
+            filter.sorts.push({
+                field: req.sort,
+                order: req.order
+            });
+        }
+        const [products, totalProducts] = yield product_repository_1.ProductRepository.findManyAndCountByFilter(filter);
+        const pagination = (0, calculate_pagination_1.calculatePaginationMetadata)(totalProducts, req.page, req.pageSize);
         const response = {
-            data: products.data,
+            data: products,
             metadata: {
                 totalPages: pagination.totalPages,
                 currentPage: pagination.currentPage,
@@ -255,7 +273,7 @@ ProductService.getProductsByFilter = (req) => __awaiter(void 0, void 0, void 0, 
         return response;
     }
     catch (error) {
-        winston_1.logger.error(`[getProductsByFilter] Service error retrieving products by filter: ${error}`);
+        winston_1.logger.error(`[ProductService.getByFilter] Error retrieving products by filter: ${error}`);
         throw failure_1.Failure.internalServer('Failed to retrieve products by filter');
     }
 });

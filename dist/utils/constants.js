@@ -22,9 +22,10 @@ const CONSTANTS = {
         IAT: 'x-iat',
         EXP: 'x-exp'
     },
-    PAGINATION: {
+    QUERY: {
         DEFAULT_PAGE: 1,
-        DEFAULT_PAGESIZE: 10
+        DEFAULT_PAGESIZE: 10,
+        DEFAULT_ORDER: 'desc'
     },
     SERVER: {
         DEFAULT_PORT: 3000

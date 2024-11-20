@@ -15,23 +15,25 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
+const user_model_1 = require("../user-model");
 class AuthValidator {
 }
 exports.AuthValidator = AuthValidator;
 _a = AuthValidator;
 // Register section
-AuthValidator.registerBodyValidator = joi_1.default.object({
+AuthValidator.registerRequestValidator = joi_1.default.object({
     email: joi_1.default.string().email().required(),
-    password: joi_1.default.string().min(6).required()
+    password: joi_1.default.string().min(6).required(),
+    role: joi_1.default.string().valid(user_model_1.Role).required()
 });
-AuthValidator.validateRegisterBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.registerBodyValidator.validateAsync(body);
+AuthValidator.validateRegister = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.registerRequestValidator.validateAsync(req);
 });
 // Login section
-AuthValidator.loginBodyValidator = joi_1.default.object({
+AuthValidator.loginRequestValidator = joi_1.default.object({
     email: joi_1.default.string().email().required(),
     password: joi_1.default.string().required()
 });
-AuthValidator.validateLoginBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.loginBodyValidator.validateAsync(body);
+AuthValidator.validateLogin = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.loginRequestValidator.validateAsync(req);
 });
