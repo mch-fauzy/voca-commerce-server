@@ -22,7 +22,7 @@ class ProductRepository {
 
     static updateById = async (primaryId: ProductPrimaryId, data: UpdateProduct | SoftDeleteProduct) => {
         try {
-            const isProductAvailable = await this.existById(primaryId);
+            const isProductAvailable = await this.existsById(primaryId);
             if (!isProductAvailable) throw Failure.notFound(`Product not found`);
 
             await prisma.voca_product.update({
@@ -39,7 +39,7 @@ class ProductRepository {
 
     static deleteById = async (primaryId: ProductPrimaryId) => {
         try {
-            const isProductAvailable = await this.existById(primaryId);
+            const isProductAvailable = await this.existsById(primaryId);
             if (!isProductAvailable) throw Failure.notFound(`Product not found`);
 
             await prisma.voca_product.delete({ where: { id: primaryId.id } });
@@ -123,7 +123,7 @@ class ProductRepository {
     };
 
     // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
-    static existById = async (primaryId: ProductPrimaryId) => {
+    static existsById = async (primaryId: ProductPrimaryId) => {
         try {
             const product = await prisma.voca_product.findUnique({
                 where: { id: primaryId.id },
@@ -132,7 +132,7 @@ class ProductRepository {
 
             return product ? true : false;
         } catch (error) {
-            logger.error('[ProductRepository.existById] Error determining product by id');
+            logger.error('[ProductRepository.existsById] Error determining product by id');
             throw Failure.internalServer('Failed to determine product by id');
         }
     };

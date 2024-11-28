@@ -195,7 +195,7 @@ class ProductService {
             const productCache = await RedisUtils.getCacheByKey(productKey);
             if (productCache) {
                 const response: ProductResponse = JSON.parse(productCache); // JSON.parse to converts a JavaScript Object Notation (JSON) string into an object
-                response.metadata.isFromCache = true
+                response.metadata.isFromCache = true;
                 return response;
             };
 

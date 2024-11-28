@@ -14,13 +14,15 @@ exports.WalletService = void 0;
 const winston_1 = require("../configs/winston");
 const wallet_model_1 = require("../models/wallet-model");
 const wallet_repository_1 = require("../repositories/wallet-repository");
+const constants_1 = require("../utils/constants");
 const failure_1 = require("../utils/failure");
+const redis_cache_1 = require("../utils/redis-cache");
 // Wallet must associated with userId
 class WalletService {
 }
 exports.WalletService = WalletService;
 _a = WalletService;
-WalletService.createByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
+WalletService.create = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const totalWallets = yield wallet_repository_1.WalletRepository.countByFilter({
             filterFields: [{
@@ -41,12 +43,20 @@ WalletService.createByUserId = (req) => __awaiter(void 0, void 0, void 0, functi
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[WalletService.createByUserId] Error creating wallet by user id: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to create wallet by user id');
+        winston_1.logger.error(`[WalletService.create] Error creating wallet: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to create wallet');
     }
 });
 WalletService.getBalanceByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const walletBalanceKey = `${constants_1.CONSTANTS.REDIS.WALLET_BALANCE_KEY}:${req.userId}`;
+        const walletBalanceCache = yield redis_cache_1.RedisUtils.getCacheByKey(walletBalanceKey);
+        if (walletBalanceCache) {
+            const response = JSON.parse(walletBalanceCache);
+            response.metadata.isFromCache = true;
+            return response;
+        }
+        ;
         const [wallets, totalWallets] = yield wallet_repository_1.WalletRepository.findManyAndCountByFilter({
             selectFields: [
                 wallet_model_1.WALLET_DB_FIELD.balance
@@ -60,8 +70,12 @@ WalletService.getBalanceByUserId = (req) => __awaiter(void 0, void 0, void 0, fu
         if (totalWallets === 0)
             throw failure_1.Failure.notFound('User does not have a wallet');
         const response = {
-            balance: wallets[0].balance
+            data: wallets[0],
+            metadata: {
+                isFromCache: false
+            }
         };
+        yield redis_cache_1.RedisUtils.storeCacheWithExpiry(walletBalanceKey, constants_1.CONSTANTS.REDIS.CACHE_EXPIRY, JSON.stringify(response));
         return response;
     }
     catch (error) {

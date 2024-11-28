@@ -15,18 +15,19 @@ const http_status_codes_1 = require("http-status-codes");
 const constants_1 = require("../utils/constants");
 const wallet_service_1 = require("../services/wallet-service");
 const response_1 = require("../utils/response");
+const wallet_dto_1 = require("../models/dto/wallet-dto");
 class WalletController {
 }
 exports.WalletController = WalletController;
 _a = WalletController;
 WalletController.createForCurrentUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const email = String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL]);
-        const response = yield wallet_service_1.WalletService.createByUserId({
-            userId,
-            email
-        });
+        const request = {
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]),
+            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+        };
+        const validatedRequest = yield wallet_dto_1.WalletValidator.validateCreate(request);
+        const response = yield wallet_service_1.WalletService.create(validatedRequest);
         (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
@@ -35,11 +36,12 @@ WalletController.createForCurrentUser = (req, res, next) => __awaiter(void 0, vo
 });
 WalletController.getBalanceForCurrentUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const userId = String(req.headers[constants_1.CONSTANTS.HEADERS.USERID]);
-        const response = yield wallet_service_1.WalletService.getBalanceByUserId({
-            userId
-        });
-        (0, response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
+        const request = {
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID])
+        };
+        const validatedRequest = yield wallet_dto_1.WalletValidator.validateGetBalanceByUserId(request);
+        const response = yield wallet_service_1.WalletService.getBalanceByUserId(validatedRequest);
+        (0, response_1.responseWithMetadata)(res, http_status_codes_1.StatusCodes.OK, response.data, response.metadata);
     }
     catch (error) {
         next(error);

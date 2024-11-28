@@ -100,11 +100,11 @@ WalletRepository.countByFilter = (filter) => __awaiter(void 0, void 0, void 0, f
 // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
 WalletRepository.existsById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const product = yield prisma_client_1.prisma.voca_wallet.findUnique({
+        const wallet = yield prisma_client_1.prisma.voca_wallet.findUnique({
             where: { id: primaryId.id },
             select: { id: true }
         });
-        return product ? true : false;
+        return wallet ? true : false;
     }
     catch (error) {
         winston_1.logger.error('[WalletRepository.existsById] Error determining wallet by id');

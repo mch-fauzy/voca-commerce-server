@@ -29,7 +29,7 @@ ProductRepository.create = (data) => __awaiter(void 0, void 0, void 0, function*
 });
 ProductRepository.updateById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isProductAvailable = yield _a.existById(primaryId);
+        const isProductAvailable = yield _a.existsById(primaryId);
         if (!isProductAvailable)
             throw failure_1.Failure.notFound(`Product not found`);
         yield prisma_client_1.prisma.voca_product.update({
@@ -46,7 +46,7 @@ ProductRepository.updateById = (primaryId, data) => __awaiter(void 0, void 0, vo
 });
 ProductRepository.deleteById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isProductAvailable = yield _a.existById(primaryId);
+        const isProductAvailable = yield _a.existsById(primaryId);
         if (!isProductAvailable)
             throw failure_1.Failure.notFound(`Product not found`);
         yield prisma_client_1.prisma.voca_product.delete({ where: { id: primaryId.id } });
@@ -117,7 +117,7 @@ ProductRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 
     }
 });
 // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
-ProductRepository.existById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
+ProductRepository.existsById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const product = yield prisma_client_1.prisma.voca_product.findUnique({
             where: { id: primaryId.id },
@@ -126,7 +126,7 @@ ProductRepository.existById = (primaryId) => __awaiter(void 0, void 0, void 0, f
         return product ? true : false;
     }
     catch (error) {
-        winston_1.logger.error('[ProductRepository.existById] Error determining product by id');
+        winston_1.logger.error('[ProductRepository.existsById] Error determining product by id');
         throw failure_1.Failure.internalServer('Failed to determine product by id');
     }
 });

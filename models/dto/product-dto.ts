@@ -50,7 +50,7 @@ interface ProductResponse {
 }
 
 interface ProductListResponse {
-    data: Pick<Product, 'id' | 'name' | 'description' | 'price' | 'createdAt' | 'updatedAt'>[];
+    data: Pick<Product, 'id' | 'name' | 'description' | 'price' | 'available' | 'createdAt' | 'updatedAt'>[];
     metadata: Metadata;
 }
 
