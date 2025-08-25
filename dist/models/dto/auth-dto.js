@@ -24,7 +24,7 @@ _a = AuthValidator;
 AuthValidator.registerRequestValidator = joi_1.default.object({
     email: joi_1.default.string().email().required(),
     password: joi_1.default.string().min(6).required(),
-    role: joi_1.default.string().valid(user_model_1.Role).required()
+    role: joi_1.default.string().valid(...Object.values(user_model_1.Role)).required()
 });
 AuthValidator.validateRegister = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return yield _a.registerRequestValidator.validateAsync(req);
