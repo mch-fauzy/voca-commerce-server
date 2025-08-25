@@ -14,12 +14,12 @@ interface ProductRequestBody {
 }
 
 interface ProductCreateRequest extends ProductRequestBody {
-    email: string;
+    userId: string;
 }
 
 interface ProductUpdateByIdRequest extends ProductRequestBody {
     id: number;
-    email: string;
+    userId: string;
 }
 
 interface ProductDeleteByIdRequest {
@@ -29,7 +29,7 @@ interface ProductDeleteByIdRequest {
 
 interface ProductSoftDeleteByIdRequest {
     id: number;
-    email: string;
+    userId: string;
 }
 
 interface ProductGetByIdRequest {
@@ -61,7 +61,7 @@ class ProductValidator {
         description: Joi.string().allow(null).optional(),
         price: Joi.number().min(0).required(),
         available: Joi.boolean().required(),
-        email: Joi.string().email().required()
+        userId: Joi.string().required()
     });
 
     static validateCreate = async (req: ProductCreateRequest): Promise<ProductCreateRequest> => {
@@ -75,7 +75,7 @@ class ProductValidator {
         price: Joi.number().min(0).optional(),
         available: Joi.boolean().optional(),
         id: Joi.number().required(),
-        email: Joi.string().email().required()
+        userId: Joi.string().required()
     }).or('name', 'description', 'price', 'available'); // At least one field from following must be present
 
     static validateUpdateById = async (req: ProductUpdateByIdRequest): Promise<ProductUpdateByIdRequest> => {
@@ -84,11 +84,8 @@ class ProductValidator {
 
     // Delete product by id section
     private static deleteByIdRequestValidator = Joi.object({
-        name: Joi.string().required(),
-        description: Joi.string().allow(null).optional(),
-        price: Joi.number().min(0).required(),
-        available: Joi.boolean().required(),
-        email: Joi.string().email().required()
+        id: Joi.number().required(),
+        userId: Joi.string().required()
     });
 
     static validateDeleteById = async (req: ProductDeleteByIdRequest): Promise<ProductDeleteByIdRequest> => {
@@ -98,7 +95,7 @@ class ProductValidator {
     // Soft delete product by id section
     private static softDeleteByIdRequestValidator = Joi.object({
         id: Joi.number().required(),
-        email: Joi.string().email().required()
+        userId: Joi.string().required()
     });
 
     static validateSoftDeleteById = async (req: ProductSoftDeleteByIdRequest): Promise<ProductSoftDeleteByIdRequest> => {

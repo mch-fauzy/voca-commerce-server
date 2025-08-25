@@ -25,7 +25,7 @@ ProductValidator.createRequestValidator = joi_1.default.object({
     description: joi_1.default.string().allow(null).optional(),
     price: joi_1.default.number().min(0).required(),
     available: joi_1.default.boolean().required(),
-    email: joi_1.default.string().email().required()
+    userId: joi_1.default.string().required()
 });
 ProductValidator.validateCreate = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return yield _a.createRequestValidator.validateAsync(req);
@@ -37,18 +37,15 @@ ProductValidator.updateByIdRequestValidator = joi_1.default.object({
     price: joi_1.default.number().min(0).optional(),
     available: joi_1.default.boolean().optional(),
     id: joi_1.default.number().required(),
-    email: joi_1.default.string().email().required()
+    userId: joi_1.default.string().required()
 }).or('name', 'description', 'price', 'available'); // At least one field from following must be present
 ProductValidator.validateUpdateById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return yield _a.updateByIdRequestValidator.validateAsync(req);
 });
 // Delete product by id section
 ProductValidator.deleteByIdRequestValidator = joi_1.default.object({
-    name: joi_1.default.string().required(),
-    description: joi_1.default.string().allow(null).optional(),
-    price: joi_1.default.number().min(0).required(),
-    available: joi_1.default.boolean().required(),
-    email: joi_1.default.string().email().required()
+    id: joi_1.default.number().required(),
+    userId: joi_1.default.string().required()
 });
 ProductValidator.validateDeleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return yield _a.deleteByIdRequestValidator.validateAsync(req);
@@ -56,7 +53,7 @@ ProductValidator.validateDeleteById = (req) => __awaiter(void 0, void 0, void 0,
 // Soft delete product by id section
 ProductValidator.softDeleteByIdRequestValidator = joi_1.default.object({
     id: joi_1.default.number().required(),
-    email: joi_1.default.string().email().required()
+    userId: joi_1.default.string().required()
 });
 ProductValidator.validateSoftDeleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
     return yield _a.softDeleteByIdRequestValidator.validateAsync(req);

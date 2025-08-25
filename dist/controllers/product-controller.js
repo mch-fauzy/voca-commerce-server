@@ -27,7 +27,7 @@ ProductController.create = (req, res, next) => __awaiter(void 0, void 0, void 0,
             description: req.body.description,
             price: req.body.price,
             available: req.body.available,
-            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID])
         };
         const validatedRequest = yield product_dto_1.ProductValidator.validateCreate(request);
         const response = yield product_service_1.ProductService.create(validatedRequest);
@@ -45,7 +45,7 @@ ProductController.updateById = (req, res, next) => __awaiter(void 0, void 0, voi
             price: req.body.price,
             available: req.body.available,
             id: Number(req.params.id),
-            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID])
         };
         const validatedRequest = yield product_dto_1.ProductValidator.validateUpdateById(request);
         const response = yield product_service_1.ProductService.updateById(validatedRequest);
@@ -73,7 +73,7 @@ ProductController.softDeleteById = (req, res, next) => __awaiter(void 0, void 0,
     try {
         const request = {
             id: Number(req.params.id),
-            email: String(req.headers[constants_1.CONSTANTS.HEADERS.EMAIL])
+            userId: String(req.headers[constants_1.CONSTANTS.HEADERS.USERID])
         };
         const validatedRequest = yield product_dto_1.ProductValidator.validateSoftDeleteById(request);
         const response = yield product_service_1.ProductService.softDeleteById(validatedRequest);

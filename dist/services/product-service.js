@@ -31,8 +31,8 @@ ProductService.create = (req) => __awaiter(void 0, void 0, void 0, function* () 
                 description: req.description,
                 price: req.price,
                 available: req.available,
-                createdBy: req.email,
-                updatedBy: req.email
+                createdBy: req.userId,
+                updatedBy: req.userId
             }),
             // Delete all cache related to set if new data created
             redis_cache_1.RedisUtils.deleteCacheFromSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY)
@@ -77,7 +77,7 @@ ProductService.updateById = (req) => __awaiter(void 0, void 0, void 0, function*
                 description: req.description,
                 price: req.price,
                 available: req.available,
-                updatedBy: req.email
+                updatedBy: req.userId
             }),
             redis_cache_1.RedisUtils.deleteCacheByKey(`${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`),
             redis_cache_1.RedisUtils.deleteCacheFromSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY),
@@ -106,7 +106,7 @@ ProductService.softDeleteById = (req) => __awaiter(void 0, void 0, void 0, funct
         yield Promise.all([
             product_repository_1.ProductRepository.updateById(primaryId, {
                 deletedAt: new Date(),
-                deletedBy: req.email
+                deletedBy: req.userId
             }),
             redis_cache_1.RedisUtils.deleteCacheByKey(`${constants_1.CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`),
             redis_cache_1.RedisUtils.deleteCacheFromSet(constants_1.CONSTANTS.REDIS.PRODUCT_SET_KEY),

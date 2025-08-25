@@ -29,7 +29,7 @@ class ProductController {
                 description: req.body.description,
                 price: req.body.price,
                 available: req.body.available,
-                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+                userId: String(req.headers[CONSTANTS.HEADERS.USERID])
             };
             const validatedRequest = await ProductValidator.validateCreate(request);
             const response = await ProductService.create(validatedRequest);
@@ -48,7 +48,7 @@ class ProductController {
                 price: req.body.price,
                 available: req.body.available,
                 id: Number(req.params.id),
-                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+                userId: String(req.headers[CONSTANTS.HEADERS.USERID])
             };
             const validatedRequest = await ProductValidator.validateUpdateById(request);
             const response = await ProductService.updateById(validatedRequest);
@@ -78,7 +78,7 @@ class ProductController {
         try {
             const request: ProductSoftDeleteByIdRequest = {
                 id: Number(req.params.id),
-                email: String(req.headers[CONSTANTS.HEADERS.EMAIL])
+                userId: String(req.headers[CONSTANTS.HEADERS.USERID])
             };
             const validatedRequest = await ProductValidator.validateSoftDeleteById(request);
             const response = await ProductService.softDeleteById(validatedRequest);

@@ -30,8 +30,8 @@ class ProductService {
                     description: req.description,
                     price: req.price,
                     available: req.available,
-                    createdBy: req.email,
-                    updatedBy: req.email
+                    createdBy: req.userId,
+                    updatedBy: req.userId
                 }),
 
                 // Delete all cache related to set if new data created
@@ -80,7 +80,7 @@ class ProductService {
                     description: req.description,
                     price: req.price,
                     available: req.available,
-                    updatedBy: req.email
+                    updatedBy: req.userId
                 }),
                 RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`),
                 RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY),
@@ -111,7 +111,7 @@ class ProductService {
             await Promise.all([
                 ProductRepository.updateById(primaryId, {
                     deletedAt: new Date(),
-                    deletedBy: req.email
+                    deletedBy: req.userId
                 }),
                 RedisUtils.deleteCacheByKey(`${CONSTANTS.REDIS.PRODUCT_KEY}:${req.id}`),
                 RedisUtils.deleteCacheFromSet(CONSTANTS.REDIS.PRODUCT_SET_KEY),
