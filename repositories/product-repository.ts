@@ -2,86 +2,105 @@ import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
 import { Filter } from '../models/filter';
 import {
+    Product,
+    ProductPrimaryId,
     CreateProduct,
     SoftDeleteProduct,
     UpdateProduct
 } from '../models/product-model';
-import { CustomError } from '../utils/custom-error';
+import { Failure } from '../utils/failure';
 
 class ProductRepository {
-    static createProduct = async (data: CreateProduct) => {
+    static create = async (data: CreateProduct) => {
         try {
-            const createdProduct = await prisma.voca_product.create({ data: data });
-
-            return createdProduct;
+            await prisma.voca_product.create({ data: data });
         } catch (error) {
-            logger.error(`[createProduct] Repository error creating product: ${error}`);
-            throw CustomError.internalServer('Failed to create product');
+            logger.error(`[ProductRepository.create] Error creating product: ${error}`);
+            throw Failure.internalServer('Failed to create product');
         }
-    }
+    };
 
-    static getProductById = async (id: number, fields?: Pick<Filter, 'selectFields'>) => {
+    static updateById = async (primaryId: ProductPrimaryId, data: UpdateProduct | SoftDeleteProduct) => {
+        try {
+            const isProductAvailable = await this.existsById(primaryId);
+            if (!isProductAvailable) throw Failure.notFound(`Product not found`);
+
+            await prisma.voca_product.update({
+                where: { id: primaryId.id },
+                data: data
+            });
+        } catch (error) {
+            if (error instanceof Failure) throw error;
+
+            logger.error(`[ProductRepository.updateById] Error updating product by id: ${error}`);
+            throw Failure.internalServer('Failed to update product by id');
+        }
+    };
+
+    static deleteById = async (primaryId: ProductPrimaryId) => {
+        try {
+            const isProductAvailable = await this.existsById(primaryId);
+            if (!isProductAvailable) throw Failure.notFound(`Product not found`);
+
+            await prisma.voca_product.delete({ where: { id: primaryId.id } });
+        } catch (error) {
+            if (error instanceof Failure) throw error;
+
+            logger.error(`[ProductRepository.deleteById] Error deleting product by id: ${error}`);
+            throw Failure.internalServer('Failed to delete product by id');
+        }
+    };
+
+    static findById = async (primaryId: ProductPrimaryId, fields?: Pick<Filter, 'selectFields'>): Promise<Product> => {
         try {
             const { selectFields } = fields ?? {};
 
-            // Handle select specific field
+            // Handle select specific field (output: create a single object from array of array)
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => {
-                        return [field, true];
-                    })
+                    selectFields.map((field) => [field, true]) // array of array
                 )
                 : undefined;
 
             const product = await prisma.voca_product.findUnique({
-                where: { id: id },
+                where: { id: primaryId.id },
                 select
             });
+            if (!product) throw Failure.notFound(`Product not found`);
 
             return product;
         } catch (error) {
-            logger.error(`[getProductById] Repository error retrieving product by id: ${error}`);
-            throw CustomError.internalServer('Failed to retrieve product by id');
-        }
-    }
+            if (error instanceof Failure) throw error;
 
-    static getProductsByFilter = async (filter: Filter) => {
+            logger.error(`[ProductRepository.findById] Error finding product by id: ${error}`);
+            throw Failure.internalServer('Failed to find product by id');
+        }
+    };
+
+    static findManyAndCountByFilter = async (filter: Filter): Promise<[Product[], number]> => {
         try {
             const { selectFields, filterFields, pagination, sorts } = filter;
 
-            // Handle select specific field
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => {
-                        return [field, true];
-                    })
+                    selectFields.map((field) => [field, true])
                 )
                 : undefined;
 
-
-            // Handle filter field (output: create a single object from list)
+            // Handle filter field (output: create a single object from array of array)
             const where = filterFields
                 ? Object.fromEntries(
-                    filterFields.map(({ field, operator, value }) => {
-                        return [field, { [operator]: value }];
-                    })
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
                 )
                 : undefined;
 
             // Handle pagination
-            const skip = (pagination.page - 1) * pagination.pageSize;
-            const take = pagination.pageSize;
+            const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
+            const take = pagination ? pagination.pageSize : undefined;
 
-            // Handle sort (output: list of object)
-            const orderBy = sorts
-                ? sorts.map(({ field, order }) => {
-                    if (!field) return {};
-
-                    return {
-                        [field]: order
-                    };
-                })
-                : undefined;
+            // Handle sort (output: array of object)
+            const orderBy = sorts?.filter(sort => sort.field) // filter out undefined or empty fields
+                .map(({ field, order }) => ({ [field]: order }))
 
             const [products, totalProducts] = await prisma.$transaction([
                 prisma.voca_product.findMany({
@@ -96,54 +115,27 @@ class ProductRepository {
                 })
             ]);
 
-            return {
-                data: products,
-                count: totalProducts
-            };
+            return [products, totalProducts];
         } catch (error) {
-            logger.error(`[getProductsByFilter] Repository error retrieving products by filter: ${error}`);
-            throw CustomError.internalServer('Failed to retrieve products by filter');
+            logger.error(`[ProductRepository.findManyAndCountByFilter] Error finding and counting products by filter: ${error}`);
+            throw Failure.internalServer('Failed to find and count products by filter');
         }
-    }
+    };
 
-    static isProductExistById = async (id: number) => {
+    // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
+    static existsById = async (primaryId: ProductPrimaryId) => {
         try {
             const product = await prisma.voca_product.findUnique({
-                where: { id: id },
+                where: { id: primaryId.id },
                 select: { id: true }
             });
 
             return product ? true : false;
         } catch (error) {
-            logger.error('[isProductExistById] Repository error checking product by id');
-            throw CustomError.internalServer('Failed to check product by id');
+            logger.error('[ProductRepository.existsById] Error determining product by id');
+            throw Failure.internalServer('Failed to determine product by id');
         }
-    }
-
-    static updateProductById = async (id: number, data: UpdateProduct | SoftDeleteProduct) => {
-        try {
-            const updatedProduct = await prisma.voca_product.update({
-                where: { id: id },
-                data: data
-            });
-
-            return updatedProduct;
-        } catch (error) {
-            logger.error(`[updateProductById] Repository error updating product by id: ${error}`);
-            throw CustomError.internalServer('Failed to update product by id');
-        }
-    }
-
-    static deleteProductById = async (id: number) => {
-        try {
-            const deletedProduct = await prisma.voca_product.delete({ where: { id: id } });
-
-            return deletedProduct;
-        } catch (error) {
-            logger.error(`[deleteProductById] Repository error deleting product by id: ${error}`);
-            throw CustomError.internalServer('Failed to delete product by id');
-        }
-    }
+    };
 }
 
 export { ProductRepository };

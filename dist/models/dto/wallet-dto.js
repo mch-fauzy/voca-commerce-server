@@ -13,27 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthValidator = void 0;
+exports.WalletValidator = void 0;
 const joi_1 = __importDefault(require("joi"));
-const user_model_1 = require("../user-model");
-class AuthValidator {
+class WalletValidator {
 }
-exports.AuthValidator = AuthValidator;
-_a = AuthValidator;
-// Register section
-AuthValidator.registerRequestValidator = joi_1.default.object({
-    email: joi_1.default.string().email().required(),
-    password: joi_1.default.string().min(6).required(),
-    role: joi_1.default.string().valid(user_model_1.Role).required()
+exports.WalletValidator = WalletValidator;
+_a = WalletValidator;
+WalletValidator.createRequestValidator = joi_1.default.object({
+    userId: joi_1.default.string().uuid().required(),
+    email: joi_1.default.string().email().required()
 });
-AuthValidator.validateRegister = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.registerRequestValidator.validateAsync(req);
+WalletValidator.validateCreate = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.createRequestValidator.validateAsync(req);
 });
-// Login section
-AuthValidator.loginRequestValidator = joi_1.default.object({
-    email: joi_1.default.string().email().required(),
-    password: joi_1.default.string().required()
+WalletValidator.getBalanceByUserIdValidator = joi_1.default.object({
+    userId: joi_1.default.string().uuid().required()
 });
-AuthValidator.validateLogin = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.loginRequestValidator.validateAsync(req);
+WalletValidator.validateGetBalanceByUserId = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.getBalanceByUserIdValidator.validateAsync(req);
 });

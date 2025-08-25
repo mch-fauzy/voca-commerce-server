@@ -2,28 +2,34 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { UserRepository } from '../repositories/user-repository';
 import {
-    RegisterRequest,
-    LoginRequest,
-    LoginResponse
+    AuthRegisterRequest,
+    AuthLoginRequest,
+    AuthLoginResponse
 } from '../models/dto/auth-dto';
 import {
     comparePassword,
     hashPassword
 } from '../utils/password';
 import { generateToken } from '../utils/jwt';
-import { CustomError } from '../utils/custom-error';
+import { Failure } from '../utils/failure';
 import { logger } from '../configs/winston';
 import { USER_DB_FIELD } from '../models/user-model';
 
 class AuthService {
-    static register = async (req: RegisterRequest) => {
+    static register = async (req: AuthRegisterRequest) => {
         try {
-            const isUserExist = await UserRepository.isUserExistByEmail(req.email)
-            if (isUserExist) throw CustomError.conflict('Account with this email already exists');
+            const totalUsers = await UserRepository.countByFilter({
+                filterFields: [{
+                    field: USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }]
+            });
+            if (totalUsers !== 0) throw Failure.conflict('User with this email already exists');
 
             const userId = uuidv4();
             const hashedPassword = await hashPassword(req.password);
-            await UserRepository.createUser({
+            await UserRepository.create({
                 email: req.email,
                 role: req.role,
                 id: userId,
@@ -34,40 +40,47 @@ class AuthService {
 
             return 'Success';
         } catch (error) {
-            if (error instanceof CustomError) throw error;
+            if (error instanceof Failure) throw error;
 
-            logger.error(`[register] Service error registering user: ${error}`);
-            throw CustomError.internalServer('Failed to register user');
+            logger.error(`[AuthService.register] Error registering user: ${error}`);
+            throw Failure.internalServer('Failed to register user');
         }
-    }
+    };
 
-    static login = async (req: LoginRequest) => {
+    static login = async (req: AuthLoginRequest): Promise<AuthLoginResponse> => {
         try {
-            const user = await UserRepository.getUserByEmail(req.email, {
+            const [users, totalUsers] = await UserRepository.findManyAndCountByFilter({
                 selectFields: [
+                    USER_DB_FIELD.id,
                     USER_DB_FIELD.email,
                     USER_DB_FIELD.password,
                     USER_DB_FIELD.role
-                ]
+                ],
+                filterFields: [{
+                    field: USER_DB_FIELD.email,
+                    operator: 'equals',
+                    value: req.email
+                }]
             });
-            if (!user) throw CustomError.unauthorized('Invalid credentials');
+            if (totalUsers === 0) throw Failure.unauthorized('Invalid credentials');
 
-            const isValidPassword = await comparePassword(req.password, user.password);
-            if (!isValidPassword) throw CustomError.unauthorized('Invalid credentials');
+            const isValidPassword = await comparePassword(req.password, users[0].password);
+            if (!isValidPassword) throw Failure.unauthorized('Invalid credentials');
 
-            const response: LoginResponse = generateToken({
-                email: user.email,
-                role: user.role
+            const response = generateToken({
+                userId: users[0].id,
+                email: users[0].email,
+                role: users[0].role
             });
 
             return response;
         } catch (error) {
-            if (error instanceof CustomError) throw error;
+            if (error instanceof Failure) throw error;
 
-            logger.error(`[login] Service error login user: ${error}`);
-            throw CustomError.internalServer('Failed to login user');
+            logger.error(`[AuthService.login] Error login user: ${error}`);
+            throw Failure.internalServer('Failed to login user');
         }
-    }
+    };
 }
 
 export { AuthService };

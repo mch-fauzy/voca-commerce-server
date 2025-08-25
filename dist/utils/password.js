@@ -11,14 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.comparePassword = exports.hashPassword = void 0;
 const bcryptjs_1 = require("bcryptjs");
-const hashPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
-    const salt = yield (0, bcryptjs_1.genSalt)(10);
+const hashPassword = (password_1, ...args_1) => __awaiter(void 0, [password_1, ...args_1], void 0, function* (password, saltRounds = 10) {
+    const salt = yield (0, bcryptjs_1.genSalt)(saltRounds);
     const hashedPassword = yield (0, bcryptjs_1.hash)(password, salt);
     return hashedPassword;
 });
 exports.hashPassword = hashPassword;
-const comparePassword = (inputPassword, storedPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    const isValidPassword = yield (0, bcryptjs_1.compare)(inputPassword, storedPassword);
+const comparePassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const isValidPassword = yield (0, bcryptjs_1.compare)(password, hashedPassword);
     return isValidPassword;
 });
 exports.comparePassword = comparePassword;

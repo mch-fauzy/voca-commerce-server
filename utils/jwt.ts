@@ -1,13 +1,17 @@
 import { sign } from 'jsonwebtoken';
 
-import { TokenPayload } from '../models/dto/auth-dto';
+import {
+    AuthLoginResponse,
+    AuthTokenPayload
+} from '../models/dto/auth-dto';
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from './constants';
 
-const generateToken = (req: Pick<TokenPayload, 'email' | 'role'>, type: string = 'Bearer') => {
+const generateToken = (req: Pick<AuthTokenPayload, 'userId' | 'email' | 'role'>): AuthLoginResponse => {
     const expireTime = CONSTANTS.JWT.EXPIRY;
     const token = sign(
         {
+            userId: req.userId,
             email: req.email,
             role: req.role
         },
@@ -16,9 +20,9 @@ const generateToken = (req: Pick<TokenPayload, 'email' | 'role'>, type: string =
 
     return {
         token: token,
-        tokenType: type,
+        createdAt: new Date().toISOString(),
         expiresIn: expireTime
     };
-}
+};
 
 export { generateToken };

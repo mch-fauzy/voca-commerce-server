@@ -5,13 +5,14 @@ import { authenticateToken, authorizeAdmin } from '../../middlewares/auth-middle
 
 const productRouterV1 = Router();
 
-productRouterV1.post('/products', authenticateToken, authorizeAdmin, ProductController.createProduct);
-productRouterV1.get('/products/:id', authenticateToken, authorizeAdmin, ProductController.getProductById);
-productRouterV1.delete('/products/:id', authenticateToken, authorizeAdmin, ProductController.deleteProductById);
-productRouterV1.patch('/products/:id', authenticateToken, authorizeAdmin, ProductController.updateProductById);
-productRouterV1.patch('/products/:id/soft-delete', authenticateToken, authorizeAdmin, ProductController.softDeleteProductById);
-productRouterV1.patch('/products/:id/restore', authenticateToken, authorizeAdmin, ProductController.restoreProductById);
+productRouterV1.post('/products', authenticateToken, authorizeAdmin, ProductController.create);
+productRouterV1.get('/products/:id', authenticateToken, authorizeAdmin, ProductController.getById);
+productRouterV1.delete('/products/:id', authenticateToken, authorizeAdmin, ProductController.deleteById);
+productRouterV1.patch('/products/:id', authenticateToken, authorizeAdmin, ProductController.updateById);
+productRouterV1.patch('/products/:id/soft-delete', authenticateToken, authorizeAdmin, ProductController.softDeleteById);
+productRouterV1.patch('/products/:id/restore', authenticateToken, authorizeAdmin, ProductController.restoreById);
 
-productRouterV1.get('/products', authenticateToken, ProductController.getProductsByFilter);
+// If query parameters to complex, use body to query, e.g /products/search
+productRouterV1.get('/products', authenticateToken, ProductController.getListByFilter);
 
 export { productRouterV1 };

@@ -28,7 +28,7 @@ Promise.all([initDbConnection(), initRedisConnection()])
         const server = createServer(app);
 
         server.listen(PORT, () => {
-            logger.info(`Server is running on port ${PORT}`);
+            logger.info(`Server running on port ${PORT}`);
         });
 
         // Handle startup errors

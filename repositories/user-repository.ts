@@ -1,61 +1,113 @@
 import { prisma } from '../configs/prisma-client';
 import { logger } from '../configs/winston';
 import { Filter } from '../models/filter';
-import { CreateUser } from '../models/user-model';
-import { CustomError } from '../utils/custom-error';
+import {
+    CreateUser,
+    User,
+    UserPrimaryId
+} from '../models/user-model';
+import { Failure } from '../utils/failure';
 
 class UserRepository {
-    static createUser = async (data: CreateUser) => {
+    static create = async (data: CreateUser) => {
         try {
-            const userData = await prisma.voca_user.create({ data: data });
+            const primaryId: UserPrimaryId = {
+                id: data.id
+            };
 
-            return userData;
+            const isUserAvailable = await this.existsById(primaryId);
+            if (isUserAvailable) throw Failure.conflict(`User with this id already exists`);
+
+            await prisma.voca_user.create({ data: data });
         } catch (error) {
-            logger.error(`[createUser] Repository error creating user: ${error}`);
-            throw CustomError.internalServer('Failed to create user');
+            if (error instanceof Failure) throw error;
+
+            logger.error(`[UserRepository.create] Error creating user: ${error}`);
+            throw Failure.internalServer('Failed to create user');
         }
     };
 
-    // If not passing a complex object with multiple fields, there is no need for an interface
-    static getUserByEmail = async (email: string, fields?: Pick<Filter, 'selectFields'>) => {
+    static findManyAndCountByFilter = async (filter: Filter): Promise<[User[], number]> => {
         try {
-            const { selectFields } = fields ?? {};
+            const { selectFields, filterFields, pagination, sorts } = filter;
 
-            // Handle select specific field
+            // Handle select specific field (output: create a single object from array of array)
             const select = selectFields
                 ? Object.fromEntries(
-                    selectFields.map((field) => {
-                        return [field, true];
-                    })
+                    selectFields.map((field) => [field, true]) // array of array
                 )
                 : undefined;
 
-            const userData = await prisma.voca_user.findUnique({
-                where: { email: email },
-                select
-            });
+            // Handle filter field (output: create a single object from array of array)
+            const where = filterFields
+                ? Object.fromEntries(
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]) // array of array
+                )
+                : undefined;
 
-            return userData;
+            // Handle pagination
+            const skip = pagination ? (pagination.page - 1) * pagination.pageSize : undefined;
+            const take = pagination ? pagination.pageSize : undefined;
+
+            // Handle sort (output: array of object)
+            const orderBy = sorts?.filter(sort => sort.field) // filter out undefined or empty fields
+                .map(({ field, order }) => ({ [field]: order }))
+
+            const [users, totalUsers] = await prisma.$transaction([
+                prisma.voca_user.findMany({
+                    select,
+                    where,
+                    skip,
+                    take,
+                    orderBy
+                }),
+                prisma.voca_user.count({
+                    where
+                })
+            ]);
+
+            return [users, totalUsers];
         } catch (error) {
-            logger.error(`[getUserCredentialsByEmail] Repository error retrieving user by email: ${error}`)
-            throw CustomError.internalServer('Failed to retrieve user by email');
+            logger.error(`[UserRepository.findManyAndCountByFilter] Error finding and counting users by filter: ${error}`);
+            throw Failure.internalServer('Failed to find and count users by filter');
         }
     };
 
-    static isUserExistByEmail = async (email: string) => {
+    static countByFilter = async (filter: Pick<Filter, 'filterFields'>) => {
         try {
-            const userData = await prisma.voca_user.findUnique({
-                where: { email: email },
-                select: { email: true }
+            const { filterFields } = filter;
+
+            const where = filterFields
+                ? Object.fromEntries(
+                    filterFields.map(({ field, operator, value }) => [field, { [operator]: value }])
+                )
+                : undefined;
+
+            const totalUsers = await prisma.voca_user.count({
+                where
             });
 
-            return userData ? true : false;
+            return totalUsers;
         } catch (error) {
-            logger.error(`[isUserExistByEmail] Repository error checking user by email: ${error}`)
-            throw CustomError.internalServer('Failed to check user by email');
+            logger.error(`[UserRepository.countByFilter] Error counting users by filter: ${error}`);
+            throw Failure.internalServer('Failed to count users by filter');
         }
     }
 
+    // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
+    static existsById = async (primaryId: UserPrimaryId) => {
+        try {
+            const user = await prisma.voca_user.findUnique({
+                where: { id: primaryId.id },
+                select: { id: true }
+            });
+
+            return user ? true : false;
+        } catch (error) {
+            logger.error('[UserRepository.existsById] Error determining user by id');
+            throw Failure.internalServer('Failed to determine user by id');
+        }
+    };
 }
 
 export { UserRepository };

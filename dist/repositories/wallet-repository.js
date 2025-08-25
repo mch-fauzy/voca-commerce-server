@@ -10,32 +10,41 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserRepository = void 0;
+exports.WalletRepository = void 0;
 const prisma_client_1 = require("../configs/prisma-client");
 const winston_1 = require("../configs/winston");
 const failure_1 = require("../utils/failure");
-class UserRepository {
+class WalletRepository {
 }
-exports.UserRepository = UserRepository;
-_a = UserRepository;
-UserRepository.create = (data) => __awaiter(void 0, void 0, void 0, function* () {
+exports.WalletRepository = WalletRepository;
+_a = WalletRepository;
+WalletRepository.create = (data) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const primaryId = {
-            id: data.id
-        };
-        const isUserAvailable = yield _a.existsById(primaryId);
-        if (isUserAvailable)
-            throw failure_1.Failure.conflict(`User with this id already exists`);
-        yield prisma_client_1.prisma.voca_user.create({ data: data });
+        yield prisma_client_1.prisma.voca_wallet.create({ data: data });
+    }
+    catch (error) {
+        winston_1.logger.error(`[WalletRepository.create] Error creating wallet: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to create wallet');
+    }
+});
+WalletRepository.updateById = (primaryId, data) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const isWalletAvailable = yield _a.existsById(primaryId);
+        if (!isWalletAvailable)
+            throw failure_1.Failure.notFound(`Wallet not found`);
+        yield prisma_client_1.prisma.voca_wallet.update({
+            where: { id: primaryId.id },
+            data: data
+        });
     }
     catch (error) {
         if (error instanceof failure_1.Failure)
             throw error;
-        winston_1.logger.error(`[UserRepository.create] Error creating user: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to create user');
+        winston_1.logger.error(`[WalletRepository.updateById] Error updating wallet by id: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to update wallet by id');
     }
 });
-UserRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { selectFields, filterFields, pagination, sorts } = filter;
         // Handle select specific field (output: create a single object from array of array)
@@ -53,52 +62,52 @@ UserRepository.findManyAndCountByFilter = (filter) => __awaiter(void 0, void 0, 
         const take = pagination ? pagination.pageSize : undefined;
         // Handle sort (output: array of object)
         const orderBy = sorts === null || sorts === void 0 ? void 0 : sorts.filter(sort => sort.field).map(({ field, order }) => ({ [field]: order }));
-        const [users, totalUsers] = yield prisma_client_1.prisma.$transaction([
-            prisma_client_1.prisma.voca_user.findMany({
+        const [wallets, totalWallets] = yield prisma_client_1.prisma.$transaction([
+            prisma_client_1.prisma.voca_wallet.findMany({
                 select,
                 where,
                 skip,
                 take,
                 orderBy
             }),
-            prisma_client_1.prisma.voca_user.count({
+            prisma_client_1.prisma.voca_wallet.count({
                 where
             })
         ]);
-        return [users, totalUsers];
+        return [wallets, totalWallets];
     }
     catch (error) {
-        winston_1.logger.error(`[UserRepository.findManyAndCountByFilter] Error finding and counting users by filter: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to find and count users by filter');
+        winston_1.logger.error(`[WalletRepository.findManyAndCountByFilter] Error finding and counting wallets by filter: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to find and count wallets by filter');
     }
 });
-UserRepository.countByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.countByFilter = (filter) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { filterFields } = filter;
         const where = filterFields
             ? Object.fromEntries(filterFields.map(({ field, operator, value }) => [field, { [operator]: value }]))
             : undefined;
-        const totalUsers = yield prisma_client_1.prisma.voca_user.count({
+        const totalWallets = yield prisma_client_1.prisma.voca_wallet.count({
             where
         });
-        return totalUsers;
+        return totalWallets;
     }
     catch (error) {
-        winston_1.logger.error(`[UserRepository.countByFilter] Error counting users by filter: ${error}`);
-        throw failure_1.Failure.internalServer('Failed to count users by filter');
+        winston_1.logger.error(`[WalletRepository.countByFilter] Error counting wallets by filter: ${error}`);
+        throw failure_1.Failure.internalServer('Failed to count wallets by filter');
     }
 });
 // Exists is a verb, if you want to use "is", please use isAvailable or isPresent
-UserRepository.existsById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
+WalletRepository.existsById = (primaryId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield prisma_client_1.prisma.voca_user.findUnique({
+        const wallet = yield prisma_client_1.prisma.voca_wallet.findUnique({
             where: { id: primaryId.id },
             select: { id: true }
         });
-        return user ? true : false;
+        return wallet ? true : false;
     }
     catch (error) {
-        winston_1.logger.error('[UserRepository.existsById] Error determining user by id');
-        throw failure_1.Failure.internalServer('Failed to determine user by id');
+        winston_1.logger.error('[WalletRepository.existsById] Error determining wallet by id');
+        throw failure_1.Failure.internalServer('Failed to determine wallet by id');
     }
 });

@@ -15,20 +15,21 @@ const http_status_codes_1 = require("http-status-codes");
 const auth_service_1 = require("../services/auth-service");
 const auth_dto_1 = require("../models/dto/auth-dto");
 const constants_1 = require("../utils/constants");
-const http_response_1 = require("../utils/http-response");
+const response_1 = require("../utils/response");
 class AuthController {
 }
 exports.AuthController = AuthController;
 _a = AuthController;
 AuthController.registerUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateRegisterBody(req.body);
-        const message = yield auth_service_1.AuthService.register({
-            email: body.email,
-            password: body.password,
-            role: constants_1.CONSTANTS.ROLES.USER,
-        });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, message);
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+            role: constants_1.CONSTANTS.ROLES.USER
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateRegister(request);
+        const response = yield auth_service_1.AuthService.register(validatedRequest);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         // Pass the error to the error handler
@@ -37,13 +38,14 @@ AuthController.registerUser = (req, res, next) => __awaiter(void 0, void 0, void
 });
 AuthController.registerAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateRegisterBody(req.body);
-        const message = yield auth_service_1.AuthService.register({
-            email: body.email,
-            password: body.password,
-            role: constants_1.CONSTANTS.ROLES.ADMIN,
-        });
-        (0, http_response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, message);
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+            role: constants_1.CONSTANTS.ROLES.ADMIN
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateRegister(request);
+        const response = yield auth_service_1.AuthService.register(validatedRequest);
+        (0, response_1.responseWithMessage)(res, http_status_codes_1.StatusCodes.CREATED, response);
     }
     catch (error) {
         next(error);
@@ -51,12 +53,13 @@ AuthController.registerAdmin = (req, res, next) => __awaiter(void 0, void 0, voi
 });
 AuthController.login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const body = yield auth_dto_1.AuthValidator.validateLoginBody(req.body);
-        const result = yield auth_service_1.AuthService.login({
-            email: body.email,
-            password: body.password
-        });
-        (0, http_response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, result);
+        const request = {
+            email: req.body.email,
+            password: req.body.password,
+        };
+        const validatedRequest = yield auth_dto_1.AuthValidator.validateLogin(request);
+        const response = yield auth_service_1.AuthService.login(validatedRequest);
+        (0, response_1.responseWithData)(res, http_status_codes_1.StatusCodes.OK, response);
     }
     catch (error) {
         next(error);

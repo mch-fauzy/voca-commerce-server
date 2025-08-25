@@ -4,8 +4,8 @@ import { StatusCodes } from 'http-status-codes';
 
 import { CONFIG } from '../configs/config';
 import { CONSTANTS } from '../utils/constants';
-import { TokenPayload } from '../models/dto/auth-dto';
-import { responseWithMessage } from '../utils/http-response';
+import { AuthTokenPayload } from '../models/dto/auth-dto';
+import { responseWithMessage } from '../utils/response';
 
 const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
@@ -21,15 +21,16 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
             return;
         }
 
-        const decodedTokenPayload = decodedToken as TokenPayload;
+        const decodedTokenPayload = decodedToken as AuthTokenPayload;
 
-        // Check if email and role are present
-        if (!decodedTokenPayload.email || !decodedTokenPayload.role) {
+        // Check if userId, email, and role are present
+        if (!decodedTokenPayload.userId || !decodedTokenPayload.email || !decodedTokenPayload.role) {
             responseWithMessage(res, StatusCodes.UNAUTHORIZED, 'Incomplete token payload');
             return;
         }
 
         // Set decoded token details to custom headers
+        req.headers[CONSTANTS.HEADERS.USERID] = decodedTokenPayload.userId
         req.headers[CONSTANTS.HEADERS.EMAIL] = decodedTokenPayload.email;
         req.headers[CONSTANTS.HEADERS.ROLE] = decodedTokenPayload.role;
         req.headers[CONSTANTS.HEADERS.IAT] = String(decodedTokenPayload.iat);

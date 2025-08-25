@@ -6,7 +6,8 @@ const CONSTANTS = {
     REDIS: {
         CACHE_EXPIRY: 60 * 60, // In seconds
         PRODUCT_KEY: 'product',
-        PRODUCT_SET_KEY: 'product_set'
+        PRODUCT_SET_KEY: 'product_set',
+        WALLET_BALANCE_KEY: 'wallet_balance'
     },
     ROLES: {
         ADMIN: user_model_1.Role.ADMIN,
@@ -16,14 +17,16 @@ const CONSTANTS = {
         EXPIRY: 60 * 60
     },
     HEADERS: {
+        USERID: 'x-userid',
         EMAIL: 'x-email',
         ROLE: 'x-role',
         IAT: 'x-iat',
         EXP: 'x-exp'
     },
-    PAGINATION: {
+    QUERY: {
         DEFAULT_PAGE: 1,
-        DEFAULT_PAGESIZE: 10
+        DEFAULT_PAGESIZE: 10,
+        DEFAULT_ORDER: 'desc'
     },
     SERVER: {
         DEFAULT_PORT: 3000

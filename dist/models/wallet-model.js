@@ -1,13 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PRODUCT_DB_FIELD = void 0;
-// Read-only properties
-const PRODUCT_DB_FIELD = {
+exports.WALLET_DB_FIELD = void 0;
+// Read-only property
+const WALLET_DB_FIELD = {
     id: 'id',
-    name: 'name',
-    description: 'description',
-    price: 'price',
-    available: 'available',
+    userId: 'userId',
+    balance: 'balance',
     createdAt: 'createdAt',
     createdBy: 'createdBy',
     updatedAt: 'updatedAt',
@@ -15,4 +13,4 @@ const PRODUCT_DB_FIELD = {
     deletedAt: 'deletedAt',
     deletedBy: 'deletedBy'
 };
-exports.PRODUCT_DB_FIELD = PRODUCT_DB_FIELD;
+exports.WALLET_DB_FIELD = WALLET_DB_FIELD;

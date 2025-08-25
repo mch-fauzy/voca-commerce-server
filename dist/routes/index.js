@@ -6,10 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.router = void 0;
 const express_1 = require("express");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
-const auth_route_1 = require("./v1/auth-route");
 const swagger_json_1 = __importDefault(require("../swagger.json"));
 const config_1 = require("../configs/config");
+const auth_route_1 = require("./v1/auth-route");
 const product_route_1 = require("./v1/product-route");
+const wallet_route_1 = require("./v1/wallet-route");
 const router = (0, express_1.Router)();
 exports.router = router;
 const SWAGGER_CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
@@ -22,6 +23,10 @@ const routes = [
         path: '/v1',
         route: product_route_1.productRouterV1,
     },
+    {
+        path: '/v1',
+        route: wallet_route_1.walletRouterV1
+    }
 ];
 routes.forEach((route) => {
     router.use(route.path, route.route);

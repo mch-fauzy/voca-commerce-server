@@ -1,6 +1,10 @@
 import Joi from 'joi';
 
-import { Metadata } from './metadata';
+import {
+    CacheMetadata,
+    Metadata
+} from './metadata';
+import { Product } from '../product-model';
 
 interface ProductRequestBody {
     name: string;
@@ -9,91 +13,138 @@ interface ProductRequestBody {
     available: boolean;
 }
 
-interface CreateProductRequest extends ProductRequestBody {
+interface ProductCreateRequest extends ProductRequestBody {
     email: string;
 }
 
-interface UpdateProductRequest extends ProductRequestBody {
+interface ProductUpdateByIdRequest extends ProductRequestBody {
     id: number;
     email: string;
 }
 
-interface DeleteProductRequest {
+interface ProductDeleteByIdRequest {
     id: number;
+    userId: string;
 }
 
-interface SoftDeleteProductRequest extends DeleteProductRequest {
+interface ProductSoftDeleteByIdRequest {
+    id: number;
     email: string;
 }
 
-interface GetProductByIdRequest {
+interface ProductGetByIdRequest {
     id: number;
 }
 
-interface GetProductByIdResponse {
-    data: object;
-    metadata: Pick<Metadata, 'isFromCache'>;
-}
-
-interface GetProductsByFilterRequest {
+interface ProductGetListByFilterRequest {
     page: number;
     pageSize: number;
-    name: string;
-    sort: string;
+    sort?: string;
     order: string;
+    name?: string;
 }
 
-interface GetProductsByFilterResponse {
-    data: object[];
+interface ProductResponse {
+    data: Product;
+    metadata: CacheMetadata;
+}
+
+interface ProductListResponse {
+    data: Pick<Product, 'id' | 'name' | 'description' | 'price' | 'available' | 'createdAt' | 'updatedAt'>[];
     metadata: Metadata;
 }
 
 class ProductValidator {
     // Create product section
-    private static createProductBodyValidator = Joi.object({
+    private static createRequestValidator = Joi.object({
         name: Joi.string().required(),
-        description: Joi.string().optional().allow(null),
+        description: Joi.string().allow(null).optional(),
         price: Joi.number().min(0).required(),
         available: Joi.boolean().required(),
-    })
+        email: Joi.string().email().required()
+    });
 
-    static validateCreateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
-        return await this.createProductBodyValidator.validateAsync(body);
-    }
+    static validateCreate = async (req: ProductCreateRequest): Promise<ProductCreateRequest> => {
+        return await this.createRequestValidator.validateAsync(req);
+    };
 
-    // Update product section
-    private static updateProductBodyValidator = Joi.object({
+    // Update product by id section
+    private static updateByIdRequestValidator = Joi.object({
         name: Joi.string().optional(),
-        description: Joi.string().optional().allow(null),
+        description: Joi.string().allow(null).optional(),
         price: Joi.number().min(0).optional(),
         available: Joi.boolean().optional(),
-    }).or('name', 'description', 'price', 'available') // At least one field must be present
+        id: Joi.number().required(),
+        email: Joi.string().email().required()
+    }).or('name', 'description', 'price', 'available'); // At least one field from following must be present
 
-    static validateUpdateProductBody = async (body: ProductRequestBody): Promise<ProductRequestBody> => {
-        return await this.updateProductBodyValidator.validateAsync(body);
-    }
+    static validateUpdateById = async (req: ProductUpdateByIdRequest): Promise<ProductUpdateByIdRequest> => {
+        return await this.updateByIdRequestValidator.validateAsync(req);
+    };
 
-    private static getProductsByFilterQueryValidator = Joi.object({
+    // Delete product by id section
+    private static deleteByIdRequestValidator = Joi.object({
+        name: Joi.string().required(),
+        description: Joi.string().allow(null).optional(),
+        price: Joi.number().min(0).required(),
+        available: Joi.boolean().required(),
+        email: Joi.string().email().required()
+    });
+
+    static validateDeleteById = async (req: ProductDeleteByIdRequest): Promise<ProductDeleteByIdRequest> => {
+        return await this.deleteByIdRequestValidator.validateAsync(req);
+    };
+
+    // Soft delete product by id section
+    private static softDeleteByIdRequestValidator = Joi.object({
+        id: Joi.number().required(),
+        email: Joi.string().email().required()
+    });
+
+    static validateSoftDeleteById = async (req: ProductSoftDeleteByIdRequest): Promise<ProductSoftDeleteByIdRequest> => {
+        return await this.softDeleteByIdRequestValidator.validateAsync(req);
+    };
+
+    // Restore product by id section
+    private static restoreByIdRequestValidator = Joi.object({
+        id: Joi.number().required()
+    });
+
+    static validateRestoreById = async (req: Pick<ProductSoftDeleteByIdRequest, 'id'>): Promise<Pick<ProductSoftDeleteByIdRequest, 'id'>> => {
+        return await this.restoreByIdRequestValidator.validateAsync(req);
+    };
+
+    // Get product by id section
+    private static getByIdRequestValidator = Joi.object({
+        id: Joi.number().required()
+    });
+
+    static validateGetById = async (req: ProductGetByIdRequest): Promise<ProductGetByIdRequest> => {
+        return await this.getByIdRequestValidator.validateAsync(req);
+    };
+
+    // Get product by filter section
+    private static getListByFilterRequestValidator = Joi.object({
         page: Joi.number().min(1).optional(),
         pageSize: Joi.number().min(1).optional(),
-        name: Joi.string().optional(),
-        sort: Joi.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
-        order: Joi.string().optional().valid('asc', 'desc')
-    })
+        sort: Joi.string().valid('id', 'createdAt', 'updatedAt', 'price').optional(),
+        order: Joi.string().valid('asc', 'desc').optional(),
+        name: Joi.string().optional()
+    });
 
-    static validateGetProductsByFilterQuery = async (query: Partial<GetProductsByFilterRequest>): Promise<GetProductsByFilterRequest> => {
-        return await this.getProductsByFilterQueryValidator.validateAsync(query);
-    }
+    static validateGetListByFilter = async (req: ProductGetListByFilterRequest): Promise<ProductGetListByFilterRequest> => {
+        return await this.getListByFilterRequestValidator.validateAsync(req);
+    };
 }
 
 export {
-    CreateProductRequest,
-    UpdateProductRequest,
-    DeleteProductRequest,
-    SoftDeleteProductRequest,
-    GetProductByIdRequest,
-    GetProductsByFilterRequest,
-    GetProductByIdResponse,
-    GetProductsByFilterResponse,
+    ProductCreateRequest,
+    ProductUpdateByIdRequest,
+    ProductDeleteByIdRequest,
+    ProductSoftDeleteByIdRequest,
+    ProductGetByIdRequest,
+    ProductResponse,
+    ProductGetListByFilterRequest,
+    ProductListResponse,
     ProductValidator
 };

@@ -20,32 +20,69 @@ class ProductValidator {
 exports.ProductValidator = ProductValidator;
 _a = ProductValidator;
 // Create product section
-ProductValidator.createProductBodyValidator = joi_1.default.object({
+ProductValidator.createRequestValidator = joi_1.default.object({
     name: joi_1.default.string().required(),
-    description: joi_1.default.string().optional().allow(null),
+    description: joi_1.default.string().allow(null).optional(),
     price: joi_1.default.number().min(0).required(),
     available: joi_1.default.boolean().required(),
+    email: joi_1.default.string().email().required()
 });
-ProductValidator.validateCreateProductBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.createProductBodyValidator.validateAsync(body);
+ProductValidator.validateCreate = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.createRequestValidator.validateAsync(req);
 });
-// Update product section
-ProductValidator.updateProductBodyValidator = joi_1.default.object({
+// Update product by id section
+ProductValidator.updateByIdRequestValidator = joi_1.default.object({
     name: joi_1.default.string().optional(),
-    description: joi_1.default.string().optional().allow(null),
+    description: joi_1.default.string().allow(null).optional(),
     price: joi_1.default.number().min(0).optional(),
     available: joi_1.default.boolean().optional(),
-}).or('name', 'description', 'price', 'available'); // At least one field must be present
-ProductValidator.validateUpdateProductBody = (body) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.updateProductBodyValidator.validateAsync(body);
+    id: joi_1.default.number().required(),
+    email: joi_1.default.string().email().required()
+}).or('name', 'description', 'price', 'available'); // At least one field from following must be present
+ProductValidator.validateUpdateById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.updateByIdRequestValidator.validateAsync(req);
 });
-ProductValidator.getProductsByFilterQueryValidator = joi_1.default.object({
+// Delete product by id section
+ProductValidator.deleteByIdRequestValidator = joi_1.default.object({
+    name: joi_1.default.string().required(),
+    description: joi_1.default.string().allow(null).optional(),
+    price: joi_1.default.number().min(0).required(),
+    available: joi_1.default.boolean().required(),
+    email: joi_1.default.string().email().required()
+});
+ProductValidator.validateDeleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.deleteByIdRequestValidator.validateAsync(req);
+});
+// Soft delete product by id section
+ProductValidator.softDeleteByIdRequestValidator = joi_1.default.object({
+    id: joi_1.default.number().required(),
+    email: joi_1.default.string().email().required()
+});
+ProductValidator.validateSoftDeleteById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.softDeleteByIdRequestValidator.validateAsync(req);
+});
+// Restore product by id section
+ProductValidator.restoreByIdRequestValidator = joi_1.default.object({
+    id: joi_1.default.number().required()
+});
+ProductValidator.validateRestoreById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.restoreByIdRequestValidator.validateAsync(req);
+});
+// Get product by id section
+ProductValidator.getByIdRequestValidator = joi_1.default.object({
+    id: joi_1.default.number().required()
+});
+ProductValidator.validateGetById = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.getByIdRequestValidator.validateAsync(req);
+});
+// Get product by filter section
+ProductValidator.getListByFilterRequestValidator = joi_1.default.object({
     page: joi_1.default.number().min(1).optional(),
     pageSize: joi_1.default.number().min(1).optional(),
-    name: joi_1.default.string().optional(),
-    sort: joi_1.default.string().optional().valid('id', 'createdAt', 'updatedAt', 'price'),
-    order: joi_1.default.string().optional().valid('asc', 'desc')
+    sort: joi_1.default.string().valid('id', 'createdAt', 'updatedAt', 'price').optional(),
+    order: joi_1.default.string().valid('asc', 'desc').optional(),
+    name: joi_1.default.string().optional()
 });
-ProductValidator.validateGetProductsByFilterQuery = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield _a.getProductsByFilterQueryValidator.validateAsync(query);
+ProductValidator.validateGetListByFilter = (req) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield _a.getListByFilterRequestValidator.validateAsync(req);
 });
