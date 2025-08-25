@@ -31,7 +31,7 @@ class AuthValidator {
     private static registerRequestValidator = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().min(6).required(),
-        role: Joi.string().valid(Role).required()
+        role: Joi.string().valid(...Object.values(Role)).required()
     });
 
     static validateRegister = async (req: AuthRegisterRequest): Promise<AuthRegisterRequest> => {
